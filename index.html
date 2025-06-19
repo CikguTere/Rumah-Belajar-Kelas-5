@@ -1,0 +1,1848 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rumah Belajar Kelas 5 SD</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Font: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for chat icon and other icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        html {
+            scroll-behavior: smooth; /* Enables smooth scrolling for anchor links */
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        /* Custom styles for subtle hover effect on nav links */
+        nav a {
+            position: relative;
+            padding-bottom: 4px;
+        }
+        nav a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 50%;
+            background-color: white;
+            transition: width 0.3s ease, left 0.3s ease;
+        }
+        nav a:hover::after {
+            width: 100%;
+            left: 0;
+        }
+        /* Chat button styles */
+        .chat-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #ffb703;
+            color: white;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            z-index: 1000;
+            transition: transform 0.2s ease-in-out;
+        }
+        .chat-button:hover {
+            transform: scale(1.1);
+        }
+
+        /* Chat modal styles */
+        .chat-modal {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 350px;
+            height: 500px;
+            background-color: #fff;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 999;
+            transform: scale(0); /* Initially hidden */
+            transform-origin: bottom right;
+            transition: transform 0.3s ease-in-out;
+        }
+        .chat-modal.active {
+            transform: scale(1);
+        }
+        @media (max-width: 640px) {
+            .chat-modal {
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                width: auto;
+                height: auto;
+                border-radius: 0;
+            }
+        }
+        .chat-header {
+            background-color: #fb8500;
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+        }
+        @media (max-width: 640px) {
+            .chat-header {
+                border-radius: 0;
+            }
+        }
+        .chat-body {
+            flex-grow: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background-color: #f0f2f5;
+        }
+        .chat-message {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        .chat-message.user {
+            justify-content: flex-end;
+        }
+        .chat-message.ai .message-bubble {
+            background-color: #e2e8f0;
+            color: #333;
+            border-bottom-left-radius: 0;
+        }
+        .chat-message.user .message-bubble {
+            background-color: #ffb703;
+            color: white;
+            border-bottom-right-radius: 0;
+        }
+        .message-bubble {
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 15px;
+            font-size: 14px;
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+        .chat-input-area {
+            display: flex;
+            padding: 15px;
+            border-top: 1px solid #eee;
+        }
+        .chat-input {
+            flex-grow: 1;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            padding: 10px 15px;
+            font-size: 14px;
+            outline: none;
+        }
+        .chat-send-button {
+            background-color: #fb8500;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 10px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .chat-send-button:hover {
+            background-color: #e07400;
+        }
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            margin-left: 10px;
+        }
+        .typing-indicator span {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: #888;
+            border-radius: 50%;
+            margin: 0 2px;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+        .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+        .video-container {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+            height: 0;
+            overflow: hidden;
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* shadow-md */
+            margin-bottom: 1.5rem; /* mb-6 */
+        }
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Settings modal styles */
+        .settings-modal, .custom-input-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .settings-modal.active, .custom-input-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .settings-content-wrapper, .custom-input-content { /* New wrapper for conditional content */
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        .settings-close-button, .custom-input-close-button {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #333;
+        }
+        .custom-input-content {
+            max-width: 400px; /* Smaller for input modal */
+        }
+        /* Added for nav to be always on top and click-through issues */
+        nav {
+            position: relative;
+            z-index: 20;
+        }
+    </style>
+</head>
+<body class="bg-[#fef9ef] min-h-screen flex flex-col">
+    <!-- Header Section -->
+    <header class="bg-[#ffb703] text-white p-6 text-center shadow-lg rounded-b-xl">
+        <h1 class="text-4xl md:text-5xl font-extrabold mb-2 leading-tight">Rumah Belajar Kelas 5 SD</h1>
+        <p class="text-lg md:text-xl font-medium">Selamat datang! Ayo mulai petualangan belajarmu dengan cara yang menyenangkan!</p>
+    </header>
+
+    <!-- Navigation Bar -->
+    <nav class="bg-[#fb8500] flex flex-wrap justify-center py-4 px-2 shadow-md">
+        <a id="mapelButton" href="#" class="text-white text-lg font-semibold mx-4 my-2 hover:text-gray-100 transition duration-300 cursor-pointer">Mata Pelajaran</a>
+        <a id="tentangButton" href="#" class="text-white text-lg font-semibold mx-4 my-2 hover:text-gray-100 transition duration-300 cursor-pointer">Tentang</a>
+        <a id="settingsButton" class="text-white text-lg font-semibold mx-4 my-2 hover:text-gray-100 transition duration-300 cursor-pointer">Pengaturan</a>
+        <a id="bantuanButton" href="#" class="text-white text-lg font-semibold mx-4 my-2 hover:text-gray-100 transition duration-300 cursor-pointer">Bantuan</a>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow p-6">
+        <!-- Subject List Section (Initially Visible) -->
+        <section id="subjectList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Subject cards will be dynamically loaded here by JavaScript -->
+        </section>
+
+        <!-- Chapter List Section (Initially Hidden) -->
+        <section id="chapterListContainer" class="hidden">
+            <button id="backToSubjectsBtn" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-full mb-6 transition duration-300 ease-in-out flex items-center">
+                <i class="fas fa-arrow-left mr-2"></i> Kembali ke Mata Pelajaran
+            </button>
+            <h2 id="chapterSubjectTitle" class="text-3xl font-bold text-gray-800 mb-6 text-center"></h2>
+            <div id="chapterList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <!-- Chapter cards will be dynamically loaded here by JavaScript -->
+            </div>
+        </section>
+
+        <!-- Material Section (Initially Hidden) -->
+        <section id="materialContainer" class="hidden bg-white rounded-xl shadow-md p-6 max-w-4xl mx-auto my-8">
+            <button id="backToChaptersFromMaterialBtn" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-full mb-6 transition duration-300 ease-in-out flex items-center">
+                <i class="fas fa-arrow-left mr-2"></i> Kembali ke Bab
+            </button>
+            <h2 id="materialChapterTitle" class="text-3xl font-bold text-gray-800 mb-6 text-center"></h2>
+            
+            <div id="materialVideo" class="video-container mb-6">
+                <!-- Video iframe will be loaded here -->
+            </div>
+            <div id="materialAudio" class="mb-6">
+                <!-- Audio player will be loaded here -->
+            </div>
+
+            <div id="materialContent" class="prose max-w-none text-gray-700 leading-relaxed mb-8">
+                <!-- Material content will be loaded here -->
+            </div>
+
+            <button id="startQuizFromMaterialBtn" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-full w-full transition duration-300 ease-in-out flex items-center justify-center">
+                Mulai Kuis <i class="fas fa-play ml-2"></i>
+            </button>
+        </section>
+
+        <!-- Quiz Section (Initially Hidden) -->
+        <section id="quizContainer" class="hidden bg-white rounded-xl shadow-md p-6 max-w-2xl mx-auto my-8">
+            <button id="backToMaterialBtn" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-full mb-6 transition duration-300 ease-in-out flex items-center">
+                <i class="fas fa-arrow-left mr-2"></i> Kembali ke Materi
+            </button>
+            <h2 id="quizChapterTitle" class="text-3xl font-bold text-gray-800 mb-6 text-center">Kuis: </h2>
+
+            <div id="quizQuestion" class="mb-6">
+                <p class="text-xl font-semibold text-gray-700 mb-4" id="questionText"></p>
+                <div id="quizOptions" class="space-y-3">
+                    <!-- Quiz options will be dynamically loaded here -->
+                </div>
+            </div>
+
+            <div id="quizFeedback" class="text-center font-bold text-lg mb-4 hidden"></div>
+            <button id="nextQuestionBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-full w-full transition duration-300 ease-in-out hidden">
+                Selanjutnya <i class="fas fa-arrow-right ml-2"></i>
+            </button>
+            <button id="viewResultBtn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-full w-full transition duration-300 ease-in-out hidden">
+                Lihat Hasil <i class="fas fa-trophy ml-2"></i>
+            </button>
+            <div id="quizResult" class="text-center text-2xl font-bold mt-8 hidden"></div>
+        </section>
+
+        <!-- About Us Section -->
+        <section id="tentang" class="bg-white rounded-xl shadow-md p-6 max-w-4xl mx-auto my-8 hidden">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">Tentang Rumah Belajar Kelas 5 SD</h2>
+            <div class="prose max-w-none text-gray-700 leading-relaxed">
+                <p class="mb-4">Rumah Belajar Kelas 5 SD adalah platform edukasi interaktif yang dirancang khusus untuk siswa kelas 5 Sekolah Dasar. Kami bertujuan untuk membuat pembelajaran menjadi lebih menyenangkan, mudah diakses, dan efektif.</p>
+                <p class="mb-4">Konten kami disesuaikan dengan kurikulum terbaru, mencakup berbagai mata pelajaran penting dengan materi yang jelas, video penjelasan, dan kuis interaktif untuk menguji pemahaman.</p>
+                <p class="mb-4">Dengan antarmuka yang ramah pengguna dan fitur-fitur yang menarik, kami berharap dapat membantu setiap siswa meraih potensi terbaiknya dalam belajar. Mari belajar bersama dan raih prestasi!</p>
+                <h3 class="text-2xl font-bold text-gray-800 mb-3 mt-6">Tim Kami</h3>
+                <p>Kami adalah tim kecil yang bersemangat dalam pendidikan dan teknologi. Kami berkomitmen untuk terus mengembangkan dan memperbarui platform ini agar selalu relevan dan bermanfaat bagi para siswa, guru, dan orang tua.</p>
+            </div>
+        </section>
+
+        <!-- Help Section -->
+        <section id="bantuan" class="bg-white rounded-xl shadow-md p-6 max-w-4xl mx-auto my-8 hidden">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">Bantuan & FAQ</h2>
+            <div class="prose max-w-none text-gray-700 leading-relaxed">
+                <p class="mb-4">Selamat datang di halaman bantuan! Di sini Anda akan menemukan informasi umum dan jawaban atas pertanyaan yang sering diajukan.</p>
+                
+                <h3 class="text-2xl font-bold text-gray-800 mb-3">Bagaimana cara menggunakan aplikasi ini?</h3>
+                <p class="mb-4">Cukup klik pada mata pelajaran yang ingin Anda pelajari, lalu pilih babnya. Setiap bab berisi materi pembelajaran dan kuis untuk menguji pemahaman Anda.</p>
+
+                <h3 class="text-2xl font-bold text-gray-800 mb-3">Bagaimana cara mengatur konten?</h3>
+                <p class="mb-4">Untuk mengatur konten (menambah, mengedit, menghapus mata pelajaran atau bab), klik tombol "Pengaturan" di navigasi atas. Anda akan diminta untuk memasukkan password. Password default adalah `<span class="font-bold">adminpassword</span>`.</p>
+
+                <h3 class="text-2xl font-bold text-gray-800 mb-3">Bagaimana cara mengubah password pengaturan?</h3>
+                <p class="mb-4">Setelah Anda berhasil masuk ke pengaturan, Anda akan menemukan bagian "Ubah Password Pengaturan". Masukkan password lama Anda, lalu masukkan password baru dan konfirmasinya.</p>
+
+                <h3 class="text-2xl font-bold text-gray-800 mb-3">Apakah data saya aman?</h3>
+                <p class="mb-4">Aplikasi ini menyimpan data Anda secara lokal di *browser* Anda. Ini berarti data hanya dapat diakses dari *browser* yang sama di perangkat yang sama. Jika Anda menghapus *cache* atau data situs, data Anda mungkin hilang.</p>
+
+                <p class="mt-8 text-center text-gray-600">Jika Anda memiliki pertanyaan lain, silakan gunakan fitur chat dengan Cikgu Tere!</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer Section -->
+    <footer class="bg-gray-300 text-center p-4 mt-auto rounded-t-xl shadow-inner">
+        <p class="text-gray-700">&copy; 2025 Rumah Belajar Kelas 5 SD</p>
+    </footer>
+
+    <!-- Chat Button -->
+    <div id="chatButton" class="chat-button">
+        <i class="fas fa-comments"></i>
+    </div>
+
+    <!-- Chat Modal -->
+    <div id="chatModal" class="chat-modal hidden">
+        <div class="chat-header">
+            <h3 class="text-xl font-bold">Cikgu Tere</h3>
+            <button id="closeChat" class="text-white hover:text-gray-100 text-2xl">&times;</button>
+        </div>
+        <div id="chatBody" class="chat-body">
+            <!-- Chat messages will be appended here -->
+            <div class="chat-message ai">
+                <div class="message-bubble">Halo! Saya Cikgu Tere. Ada yang bisa saya bantu hari ini?</div>
+            </div>
+        </div>
+        <div class="chat-input-area">
+            <input type="text" id="chatInput" class="chat-input" placeholder="Ketik pesan Anda...">
+            <button id="sendMessage" class="chat-send-button">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="settings-modal">
+        <div class="settings-content-wrapper">
+            <button id="closeSettings" class="settings-close-button">&times;</button>
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">Pengaturan Konten</h2>
+
+            <!-- Password Input Section (Initially Visible if not admin) -->
+            <div id="passwordInputSection" class="mb-8 p-4 border border-gray-200 rounded-lg">
+                <h3 class="text-2xl font-bold text-gray-700 mb-4">Akses Pengaturan</h3>
+                <div class="mb-4">
+                    <label for="settingsPasswordEntry" class="block text-gray-700 text-sm font-bold mb-2">Password:</label>
+                    <input type="password" id="settingsPasswordEntry" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+                <button id="submitSettingsPasswordBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md w-full">Masuk</button>
+                <p id="authFeedback" class="text-center text-red-600 font-bold mt-4"></p>
+            </div>
+
+            <!-- Main Settings Content (Initially Hidden) -->
+            <div id="mainSettingsContent" class="hidden">
+                <!-- Subject Management -->
+                <div class="mb-8 p-4 border border-gray-200 rounded-lg">
+                    <h3 class="text-2xl font-bold text-gray-700 mb-4">Manajemen Mata Pelajaran</h3>
+                    <div class="flex flex-col sm:flex-row gap-4 mb-4">
+                        <select id="selectSubjectToEdit" class="flex-grow p-2 border rounded-md"></select>
+                        <button id="editSubjectBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md">Edit Detail Mata Pelajaran</button>
+                        <button id="deleteSubjectBtn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-md">Hapus Mata Pelajaran</button>
+                    </div>
+                    <button id="addNewSubjectBtn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-md w-full">Tambah Mata Pelajaran Baru</button>
+                    
+                    <div id="subjectEditForm" class="mt-6 p-4 border border-gray-300 rounded-lg bg-gray-50 hidden">
+                        <h4 class="text-xl font-semibold mb-3">Edit Mata Pelajaran</h4>
+                        <label for="editSubjectName" class="block text-gray-700 text-sm font-bold mb-2">Nama Mata Pelajaran:</label>
+                        <input type="text" id="editSubjectName" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-4">
+                        <label for="editSubjectDescription" class="block text-gray-700 text-sm font-bold mb-2">Deskripsi:</label>
+                        <textarea id="editSubjectDescription" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline h-24 mb-4"></textarea>
+                        <button id="saveSubjectChangesBtn" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded-md w-full">Simpan Perubahan Mata Pelajaran</button>
+                    </div>
+                </div>
+
+                <!-- Chapter Management -->
+                <div class="mb-8 p-4 border border-gray-200 rounded-lg">
+                    <h3 class="text-2xl font-bold text-gray-700 mb-4">Manajemen Bab</h3>
+                    <div class="flex flex-col sm:flex-row gap-4 mb-4">
+                        <select id="selectSubjectForChapters" class="flex-grow p-2 border rounded-md"></select>
+                        <select id="selectChapterToEdit" class="flex-grow p-2 border rounded-md"></select>
+                        <button id="editChapterBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md">Edit Detail Bab</button>
+                        <button id="deleteChapterBtn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-md">Hapus Bab</button>
+                    </div>
+                    <button id="addNewChapterBtn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-md w-full">Tambah Bab Baru</button>
+                    
+                    <div id="chapterEditForm" class="mt-6 p-4 border border-gray-300 rounded-lg bg-gray-50 hidden">
+                        <h4 class="text-xl font-semibold mb-3">Edit Bab</h4>
+                        <label for="editChapterTitle" class="block text-gray-700 text-sm font-bold mb-2">Judul Bab:</label>
+                        <input type="text" id="editChapterTitle" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-4">
+                        <label for="editChapterSummary" class="block text-gray-700 text-sm font-bold mb-2">Ringkasan Materi:</label>
+                        <textarea id="editChapterSummary" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline h-24 mb-4"></textarea>
+                        <label for="editMaterialContent" class="block text-gray-700 text-sm font-bold mb-2">Konten Materi (Teks/HTML):</label>
+                        <textarea id="editMaterialContent" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline h-48 mb-4"></textarea>
+                        <label for="editVideoUrl" class="block text-gray-700 text-sm font-bold mb-2">URL Video YouTube (embed):</label>
+                        <input type="text" id="editVideoUrl" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-4">
+                        <label for="editAudioUrl" class="block text-gray-700 text-sm font-bold mb-2">URL Audio:</label>
+                        <input type="text" id="editAudioUrl" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-4">
+                        
+                        <h4 class="text-xl font-semibold mb-3 mt-6">Edit Kuis</h4>
+                        <div id="quizQuestionsEditArea" class="space-y-4">
+                            <!-- Quiz questions will be dynamically loaded here -->
+                        </div>
+                        <button id="addQuizQuestionBtn" class="bg-blue-400 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded-md mt-4 w-full">Tambah Pertanyaan Kuis</button>
+                        <button id="saveChapterChangesBtn" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded-md w-full mt-6">Simpan Perubahan Bab</button>
+                    </div>
+                </div>
+                
+                <!-- Password Management Section -->
+                <div class="mb-8 p-4 border border-gray-200 rounded-lg">
+                    <h3 class="text-2xl font-bold text-gray-700 mb-4">Ubah Password Pengaturan</h3>
+                    <div class="mb-4">
+                        <label for="oldSettingsPasswordInput" class="block text-gray-700 text-sm font-bold mb-2">Password Lama:</label>
+                        <input type="password" id="oldSettingsPasswordInput" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                    <div class="mb-4">
+                        <label for="newSettingsPasswordInput" class="block text-gray-700 text-sm font-bold mb-2">Password Baru:</label>
+                        <input type="password" id="newSettingsPasswordInput" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                    <div class="mb-6">
+                        <label for="confirmNewSettingsPasswordInput" class="block text-gray-700 text-sm font-bold mb-2">Konfirmasi Password Baru:</label>
+                        <input type="password" id="confirmNewSettingsPasswordInput" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                    <button id="saveNewSettingsPasswordBtn" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-md w-full">Simpan Password Baru</button>
+                    <p id="passwordChangeFeedback" class="text-center text-red-600 font-bold mt-4"></p>
+                </div>
+            </div> <!-- End of mainSettingsContent -->
+
+        </div> <!-- End of settings-content-wrapper -->
+    </div> <!-- End of settingsModal -->
+
+    <!-- Custom Input Modal (New!) -->
+    <div id="customInputModal" class="custom-input-modal">
+        <div class="custom-input-content">
+            <button id="customInputCloseButton" class="custom-input-close-button">&times;</button>
+            <h3 id="customInputTitle" class="text-2xl font-bold text-gray-800 mb-4"></h3>
+            <input type="text" id="customInputField" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-4" placeholder="">
+            <p id="customInputFeedback" class="text-red-600 text-sm mb-4 hidden"></p>
+            <div class="flex justify-end gap-4">
+                <button id="customInputCancelBtn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-md">Batal</button>
+                <button id="customInputSubmitBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md">Tambah</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // --- Data Pelajaran, Bab, dan Kuis ---
+        // Data ini mensimulasikan materi dari Capaian Pembelajaran Kurikulum Merdeka Kelas 5 SD.
+        // Setiap bab dilengkapi dengan material_content (penjelasan), video_url (placeholder), dan quiz (min 5 soal).
+        const defaultAppData = {
+            subjects: [
+                { id: 'agama-katolik', name: 'Agama Katolik', description: 'Mengenal Yesus dan hidup Kristiani.' },
+                { id: 'pancasila', name: 'Pendidikan Pancasila', description: 'Nilai-nilai kebangsaan dan gotong royong.' },
+                { id: 'b-indonesia', name: 'Bahasa Indonesia', description: 'Membaca, menulis, dan bercerita.' },
+                { id: 'matematika', name: 'Matematika', description: 'Bilangan, pengukuran, dan bangun ruang.' },
+                { id: 'ipas', name: 'IPAS', description: 'Eksperimen sains dan lingkungan sekitar.' },
+                { id: 'seni-teater', name: 'Seni Teater', description: 'Bermain peran dan ekspresi diri.' },
+                { id: 'b-inggris', name: 'Bahasa Inggris', description: 'Vocabulary dan percakapan dasar.' },
+                { id: 'pjok', name: 'PJOK', description: 'Olahraga dan kesehatan tubuh.' }
+            ],
+            chapters: {
+                'agama-katolik': [
+                    {
+                        id: 'agama-katolik-bab1', title: 'Bab 1: Allah Menciptakan Kita dan Lingkungan',
+                        content_summary: 'Mempelajari tentang kebaikan Tuhan dalam menciptakan alam semesta dan isinya, serta bagaimana kita harus menjaganya.',
+                        material_content: `
+                            <h3 class="text-2xl font-bold text-gray-800 mb-4">Allah Maha Baik, Menciptakan Segalanya</h3>
+                            <p class="mb-4">Anak-anak, kita semua hidup di dunia yang indah ini. Coba perhatikan sekelilingmu! Ada langit biru, awan putih, matahari bersinar, bintang-bintang berkelip di malam hari, gunung yang menjulang tinggi, lautan yang luas, pohon-pohon rindang, bunga-bunga berwarna-warni, serta berbagai macam hewan dan tumbuhan. Semua ini sangat menakjubkan, bukan?</p>
+                            <p class="mb-4">Siapa yang menciptakan semua ini? Tentu saja, itu adalah <strong>Allah</strong>! Allah adalah pencipta yang Maha Baik dan Maha Kuasa. Dia menciptakan kita, manusia, dan juga segala sesuatu yang ada di alam semesta ini. Dari hal yang paling kecil seperti serangga, sampai hal yang paling besar seperti planet-planet, semua adalah hasil ciptaan Allah.</p>
+                            <h4 class="font-semibold text-xl mb-3">Tanggung Jawab Kita Terhadap Ciptaan Allah</h4>
+                            <p class="mb-4">Sebagai ciptaan Allah yang paling istimewa, kita, manusia, diberi tugas untuk menjaga dan melestarikan lingkungan. Ini berarti kita harus merawat bumi, tidak membuang sampah sembarangan, menyayangi hewan, merawat tumbuhan, dan menggunakan sumber daya alam dengan bijak.</p>
+                            <p class="mb-4">Dengan menjaga lingkungan, kita menunjukkan rasa syukur kita kepada Allah atas segala ciptaan-Nya yang luar biasa. Kita juga memastikan bahwa bumi ini tetap indah dan layak dihuni untuk generasi mendatang.</p>
+                            <p class="italic text-sm text-gray-500">Sumber: Diadaptasi dari materi Pendidikan Agama Katolik dan Budi Pekerti Kelas 5 SD.</p>
+                        `,
+                        video_url: 'https://www.youtube.com/embed/S2pE8-r60F8', // Placeholder: Video tentang keindahan alam ciptaan Tuhan
+                        audio_url: '', // New: Placeholder for audio
+                        quiz: [
+                            { question: 'Siapakah yang menciptakan alam semesta dan isinya?', options: ['Manusia', 'Hewan', 'Allah', 'Tumbuhan'], correct_answer_index: 2 },
+                            { question: 'Apa yang harus kita lakukan terhadap ciptaan Tuhan?', options: ['Merusak', 'Menjaga', 'Mengabaikan', 'Menjual'], correct_answer_index: 1 },
+                            { question: 'Mengapa kita perlu menjaga lingkungan?', options: ['Agar bumi cepat rusak', 'Sebagai tanda syukur kepada Allah', 'Agar bisa membuang sampah sembarangan', 'Supaya tidak ada lagi hewan'], correct_answer_index: 1 },
+                            { question: 'Contoh cara menjaga lingkungan adalah...', options: ['Menebang pohon sembarangan', 'Membuang sampah di sungai', 'Menanam pohon', 'Membakar hutan'], correct_answer_index: 2 },
+                            { question: 'Sebagai ciptaan Allah yang istimewa, manusia diberi tugas untuk...', options: ['Merusak lingkungan', 'Menggunakan sumber daya alam sepuasnya', 'Menjaga dan melestarikan lingkungan', 'Tidak peduli alam'], correct_answer_index: 2 }
+                        ]
+                    },
+                    {
+                        id: 'agama-katolik-bab2', title: 'Bab 2: Yesus Kristus Juru Selamat',
+                        content_summary: 'Mengenal Yesus sebagai Putra Allah yang datang ke dunia untuk menyelamatkan umat manusia dari dosa.',
+                        material_content: `
+                            <h3 class="text-2xl font-bold text-gray-800 mb-4">Yesus Kristus: Sang Juru Selamat</h3>
+                            <p class="mb-4">Anak-anak terkasih, dalam iman Katolik, kita mengenal sosok yang sangat penting, yaitu <strong>Yesus Kristus</strong>. Siapakah Yesus itu? Dia adalah Putra Allah yang diutus ke dunia oleh Allah Bapa. Yesus lahir di Betlehem dari Bunda Maria, dan hidup di tengah-tengah kita sebagai manusia sejati, namun tetap 100% Allah.</p>
+                            <p class="mb-4">Tujuan utama Yesus datang ke dunia adalah untuk <strong>menyelamatkan umat manusia dari dosa</strong>. Sejak dosa pertama yang dilakukan Adam dan Hawa, hubungan antara manusia dan Allah menjadi terputus. Yesus datang untuk memulihkan hubungan itu. Dia mengampuni dosa-dosa kita melalui wafat-Nya di salib dan kebangkitan-Nya dari antara orang mati.</p>
+                            <h4 class="font-semibold text-xl mb-3">Ajaran dan Teladan Yesus</h4>
+                            <p class="mb-4">Selama hidup-Nya, Yesus mengajarkan banyak hal tentang Kerajaan Allah, cinta kasih, pengampunan, dan bagaimana kita harus hidup sebagai anak-anak Allah. Dia memberikan teladan hidup yang sempurna: rendah hati, melayani, dan selalu mengasihi sesama, bahkan musuh-Nya.</p>
+                            <p class="mb-4">Dengan percaya kepada Yesus dan mengikuti ajaran-Nya, kita menerima keselamatan dan hidup yang kekal. Setiap kali kita berdoa, kita berbicara dengan-Nya, dan melalui Sakramen Ekaristi, kita menerima Dia dalam hati kita.</p>
+                            <p class="italic text-sm text-gray-500">Sumber: Diadaptasi dari materi Pendidikan Agama Katolik dan Budi Pekerti Kelas 5 SD.</p>
+                        `,
+                        video_url: 'https://www.youtube.com/embed/MQt1x9eE2K0', // Placeholder: Video tentang kisah Yesus
+                        audio_url: '', // New: Placeholder for audio
+                        quiz: [
+                            { question: 'Siapakah Yesus Kristus bagi umat Katolik?', options: ['Seorang nabi', 'Seorang guru', 'Putra Allah dan Juru Selamat', 'Seorang raja'], correct_answer_index: 2 },
+                            { question: 'Mengapa Yesus datang ke dunia?', options: ['Untuk berlibur', 'Untuk mengajar', 'Untuk menyelamatkan manusia dari dosa', 'Untuk mencari makanan'], correct_answer_index: 2 },
+                            { question: 'Yesus lahir dari siapa?', options: ['Maria dan Yusuf', 'Maria', 'Yusuf', 'Elizabeth'], correct_answer_index: 0 },
+                            { question: 'Apa yang diajarkan Yesus tentang sesama?', options: ['Membenci', 'Mengabaikan', 'Mengasihi', 'Bertengkar'], correct_answer_index: 2 },
+                            { question: 'Bagaimana cara kita menerima Yesus dalam hati kita?', options: ['Dengan marah-marah', 'Dengan tidak peduli', 'Dengan percaya dan mengikuti ajaran-Nya', 'Dengan tidur'], correct_answer_index: 2 }
+                        ]
+                    },
+                    {
+                        id: 'agama-katolik-bab3', title: 'Bab 3: Sakramen-sakramen Gereja',
+                        content_summary: 'Memahami makna dan pentingnya sakramen-sakramen dalam Gereja Katolik, seperti Baptis, Ekaristi, dan Krisma.',
+                        material_content: `
+                            <h3 class="text-2xl font-bold text-gray-800 mb-4">Mengenal Sakramen-Sakramen Gereja Katolik</h3>
+                            <p class="mb-4">Anak-anak, dalam Gereja Katolik, ada tanda-tanda istimewa yang disebut <strong>Sakramen</strong>. Sakramen adalah tanda suci dan kelihatan yang didirikan oleh Yesus Kristus untuk memberikan rahmat Allah kepada kita. Melalui sakramen, kita menerima berkat dan kekuatan dari Tuhan untuk hidup sebagai anak-anak-Nya.</p>
+                            <p class="mb-4">Ada tujuh Sakramen dalam Gereja Katolik. Mari kita kenali satu per satu:</p>
+                            <ol class="list-decimal list-inside mb-4 pl-4">
+                                <li><strong>1. Sakramen Baptis:</strong> Ini adalah sakramen pertama yang kita terima. Dengan dibaptis, kita menjadi anggota Gereja Katolik, anak Allah, dan dibersihkan dari dosa asal.</li>
+                                <li><strong>2. Sakramen Ekaristi (Komuni Kudus):</strong> Ini adalah sakramen di mana kita menerima Tubuh dan Darah Kristus yang sungguh hadir dalam rupa roti dan anggur saat Misa. Ini adalah pusat dari seluruh kehidupan Gereja.</li>
+                                <li><strong>3. Sakramen Krisma (Penguatan):</strong> Sakramen ini menyempurnakan rahmat Baptis dan menguatkan kita dengan Roh Kudus, agar kita semakin berani menjadi saksi Kristus.</li>
+                                <li><strong>4. Sakramen Tobat (Rekonsiliasi/Pengakuan Dosa):</strong> Melalui sakramen ini, dosa-dosa kita diampuni oleh Allah melalui pelayanan imam, dan kita kembali berdamai dengan Allah dan sesama.</li>
+                                <li><strong>5. Sakramen Pengurapan Orang Sakit:</strong> Sakramen ini memberikan kekuatan, penghiburan, dan penyembuhan rohani bagi orang-orang yang sakit parah atau lanjut usia.</li>
+                                <li><strong>6. Sakramen Imamat (Tahbisan):</strong> Sakramen ini memberikan kuasa kepada para pria yang dipanggil untuk menjadi diakon, imam, atau uskup, untuk melayani umat Allah.</li>
+                                <li><strong>7. Sakramen Perkawinan:</strong> Sakramen ini menyatukan seorang pria dan wanita dalam ikatan cinta yang kudus dan tak terpisahkan di hadapan Allah.</li>
+                            </ol>
+                            <p>Setiap sakramen memiliki peran penting dalam perjalanan iman kita dan membantu kita tumbuh menjadi pribadi yang lebih baik sesuai kehendak Tuhan.</p>
+                            <p class="italic text-sm text-gray-500">Sumber: Diadaptasi dari materi Pendidikan Agama Katolik dan Budi Pekerti Kelas 5 SD.</p>
+                        `,
+                        video_url: 'https://www.youtube.com/embed/example-sakramen-gereja', // Placeholder: Video tentang Sakramen Gereja Katolik
+                        audio_url: '', // New: Placeholder for audio
+                        quiz: [
+                            { question: 'Berapa jumlah sakramen dalam Gereja Katolik?', options: ['5', '6', '7', '8'], correct_answer_index: 2 },
+                            { question: 'Sakramen pertama yang membuat kita menjadi anggota Gereja adalah...', options: ['Ekaristi', 'Krisma', 'Baptis', 'Tobat'], correct_answer_index: 2 },
+                            { question: 'Melalui sakramen Ekaristi, kita menerima...', options: ['Air suci', 'Roti dan anggur biasa', 'Tubuh dan Darah Kristus', 'Pakaian baru'], correct_answer_index: 2 },
+                            { question: 'Sakramen yang memberikan kekuatan dan penghiburan bagi orang yang sakit adalah...', options: ['Perkawinan', 'Imamat', 'Tobat', 'Pengurapan Orang Sakit'], correct_answer_index: 3 },
+                            { question: 'Sakramen Krisma juga disebut sakramen...', options: ['Pengampunan', 'Penyembuhan', 'Penguatan', 'Penyucian'], correct_answer_index: 2 }
+                        ]
+                    }
+                ],
+                'pancasila': [
+                    {
+                        id: 'pancasila-bab1', title: 'Bab 1: Pancasila sebagai Dasar Negara',
+                        content_summary: 'Memahami makna dan fungsi Pancasila sebagai dasar negara Republik Indonesia serta lambangnya.',
+                        material_content: `
+                            <h3 class="text-2xl font-bold text-gray-800 mb-4">Pancasila: Dasar Negara Kita</h3>
+                            <p class="mb-4">Anak-anak hebat, tahukah kalian apa itu Pancasila? <strong>Pancasila</strong> adalah dasar negara kita, Republik Indonesia. Seperti sebuah rumah yang butuh pondasi kuat, negara kita juga punya pondasi yang sangat kuat, yaitu Pancasila!</p>
+                            <p class="mb-4">Kata "Pancasila" berasal dari dua kata Sansekerta: "Panca" yang berarti lima, dan "Sila" yang berarti dasar atau prinsip. Jadi, Pancasila berarti Lima Dasar.</p>
+                            <h4 class="font-semibold text-xl mb-3">Lima Sila Pancasila:</h4>
+                            <ol class="list-decimal list-inside mb-4 pl-4">
+                                <li><strong>Ketuhanan Yang Maha Esa:</strong> Kita percaya pada Tuhan dan saling menghargai agama lain.</li>
+                                <li><strong>Kemanusiaan yang Adil dan Beradab:</strong> Kita harus bersikap adil dan menghormati semua orang.</li>
+                                <li><strong>Persatuan Indonesia:</strong> Kita semua adalah satu bangsa, harus bersatu walau berbeda-beda.</li>
+                                <li><strong>Kerakyatan yang Dipimpin oleh Hikmat Kebijaksanaan dalam Permusyawaratan/Perwakilan:</strong> Keputusan penting diambil dengan musyawarah atau diskusi bersama.</li>
+                                <li><strong>Keadilan Sosial bagi Seluruh Rakyat Indonesia:</strong> Semua orang berhak mendapatkan perlakuan yang adil.</li>
+                            </ol>
+                            <p class="mb-4">Lambang negara kita adalah <strong>Garuda Pancasila</strong>. Burung Garuda gagah perkasa ini mencengkeram pita bertuliskan "Bhinneka Tunggal Ika", yang artinya "Berbeda-beda tetapi Tetap Satu Jua". Ini mengingatkan kita bahwa meskipun kita memiliki banyak suku, bahasa, dan agama, kita tetap satu bangsa Indonesia.</p>
+                            <p class="italic text-sm text-gray-500">Sumber: Diadaptasi dari materi Pendidikan Pancasila Kelas 5 SD (Kurikulum Merdeka).</p>
+                        `,
+                        video_url: 'https://www.youtube.com/embed/ZtqS7Xh7hXo', // Placeholder: Video tentang Pancasila dan Lambangnya
+                        audio_url: '', // New: Placeholder for audio
+                        quiz: [
+                            { question: 'Apa dasar negara Republik Indonesia?', options: ['UUD 1945', 'Pancasila', 'Bhinneka Tunggal Ika', 'NKRI'], correct_answer_index: 1 },
+                            { question: 'Apa lambang negara Indonesia?', options: ['Bendera Merah Putih', 'Garuda Pancasila', 'Peta Indonesia', 'Monas'], correct_answer_index: 1 },
+                            { question: 'Berapa jumlah sila dalam Pancasila?', options: ['Tiga', 'Empat', 'Lima', 'Enam'], correct_answer_index: 2 },
+                            { question: 'Sila pertama Pancasila berbunyi...', options: ['Keadilan Sosial', 'Persatuan Indonesia', 'Ketuhanan Yang Maha Esa', 'Kerakyatan'], correct_answer_index: 2 },
+                            { question: 'Apa arti Bhinneka Tunggal Ika?', options: ['Bersatu kita teguh', 'Berbeda-beda tetapi tetap satu jua', 'Merdeka seutuhnya', 'Indonesia Jaya'], correct_answer_index: 1 }
+                        ]
+                    },
+                    {
+                        id: 'pancasila-bab2', title: 'Bab 2: Hak dan Kewajiban Warga Negara',
+                        content_summary: 'Mempelajari hak-hak yang dimiliki warga negara dan kewajiban yang harus dilaksanakan.',
+                        material_content: `
+                            <h3 class="text-2xl font-bold text-gray-800 mb-4">Hak dan Kewajiban Kita sebagai Warga Negara</h3>
+                            <p class="mb-4">Setiap orang yang tinggal di sebuah negara disebut <strong>warga negara</strong>. Sebagai warga negara Indonesia, kita punya hak dan juga kewajiban. Apa itu hak? Apa itu kewajiban?</p>
+                            <h4 class="font-semibold text-xl mb-3">Hak</h4>
+                            <p class="mb-4"><strong>Hak</strong> adalah sesuatu yang seharusnya kita dapatkan atau kita miliki. Contoh hak kita sebagai anak dan warga negara:</p>
+                            <ul class="list-disc list-inside mb-4">
+                                <li>Hak mendapatkan pendidikan yang layak.</li>
+                                <li>Hak bermain dan mendapatkan perlindungan.</li>
+                                <li>Hak untuk hidup dan memiliki nama.</li>
+                                <li>Hak untuk berpendapat.</li>
+                                <li>Hak mendapatkan fasilitas umum (jalan, air bersih, listrik).</li>
+                            </ul>
+                            <h4 class="font-semibold text-xl mb-3">Kewajiban</h4>
+                            <p class="mb-4"><strong>Kewajiban</strong> adalah sesuatu yang harus kita lakukan atau laksanakan dengan penuh tanggung jawab. Contoh kewajiban kita sebagai anak dan warga negara:</p>
+                            <ul class="list-disc list-inside mb-4">
+                                <li>Kewajiban belajar dengan rajin.</li>
+                                <li>Kewajiban menghormati orang tua dan guru.</li>
+                                <li>Kewajiban menjaga kebersihan lingkungan.</li>
+                                <li>Kewajiban menaati peraturan.</li>
+                                <li>Kewajiban membayar pajak (untuk orang dewasa).</li>
+                            </ul>
+                            <p class="mb-4">Hak dan kewajiban harus berjalan seimbang, ya. Kita tidak bisa hanya menuntut hak tanpa melaksanakan kewajiban, begitu juga sebaliknya.</p>
+                            <p class="italic text-sm text-gray-500">Sumber: Diadaptasi dari materi Pendidikan Pancasila Kelas 5 SD (Kurikulum Merdeka).</p>
+                        `,
+                        video_url: 'https://www.youtube.com/embed/tG5p5E1b8pQ', // Placeholder: Video tentang Hak dan Kewajiban
+                        audio_url: '', // New: Placeholder for audio
+                        quiz: [
+                            { question: 'Sesuatu yang seharusnya kita dapatkan disebut...', options: ['Kewajiban', 'Hak', 'Tugas', 'Tanggung jawab'], correct_answer_index: 1 },
+                            { question: 'Salah satu hak anak adalah mendapatkan...', options: ['Uang jajan setiap hari', 'Pendidikan yang layak', 'Mainan baru setiap bulan', 'Liburan setiap minggu'], correct_answer_index: 1 },
+                            { question: 'Salah satu kewajiban siswa di sekolah adalah...', options: ['Bermain terus-menerus', 'Belajar dengan rajin', 'Tidur di kelas', 'Bolos sekolah'], correct_answer_index: 1 },
+                            { question: 'Jika kita ingin mendapatkan hak, maka kita harus dulu...', options: ['Meminta', 'Melaksanakan kewajiban', 'Menunggu', 'Membayar'], correct_answer_index: 1 },
+                            { question: 'Membuang sampah pada tempatnya adalah contoh...', options: ['Hak', 'Kewajiban', 'Hobi', 'Kesenangan'], correct_answer_index: 1 }
+                        ]
+                    }
+                ],
+                'b-indonesia': [
+                    {
+                        id: 'b-indonesia-bab1', title: 'Bab 1: Menemukan Ide Pokok',
+                        content_summary: 'Belajar cara menemukan gagasan utama atau ide pokok dalam sebuah paragraf atau teks.',
+                        material_content: `
+                            <h3 class="text-2xl font-bold text-gray-800 mb-4">Apa Itu Ide Pokok?</h3>
+                            <p class="mb-4">Dalam setiap paragraf atau teks, ada satu gagasan utama yang menjadi inti dari pembahasan. Gagasan utama ini disebut <strong>ide pokok</strong> atau gagasan pokok. Ide pokok adalah topik utama yang sedang dibicarakan dalam sebuah paragraf.</p>
+                            <h4 class="font-semibold text-xl mb-3">Cara Menemukan Ide Pokok:</h4>
+                            <ol class="list-decimal list-inside mb-4 pl-4">
+                                <li><strong>Baca seluruh paragraf dengan saksama.</strong> Pahami apa yang sedang dijelaskan.</li>
+                                <li><strong>Perhatikan kalimat pertama atau kalimat terakhir paragraf.</strong> Seringkali, ide pokok berada di awal (deduktif) atau di akhir (induktif) paragraf.</li>
+                                <li><strong>Temukan kalimat yang paling umum atau paling luas maknanya.</strong> Kalimat ini biasanya bisa mewakili seluruh isi paragraf.</li>
+                                <li><strong>Ulangi pertanyaan "Paragraf ini berbicara tentang apa?"</strong> Jawabanmu kemungkinan besar adalah ide pokoknya.</li>
+                            </ol>
+                            <p class="mb-4">Contoh: "Kucing adalah hewan peliharaan yang banyak disukai. Mereka memiliki bulu yang lembut dan tingkah laku yang lucu. Kucing juga dikenal sebagai hewan yang mandiri."</p>
+                            <p class="mb-4">Ide pokok dari paragraf di atas adalah: "Kucing adalah hewan peliharaan yang banyak disukai."</p>
+                            <p class="italic text-sm text-gray-500">Sumber: Diadaptasi dari materi Bahasa Indonesia Kelas 5 SD (Kurikulum Merdeka).</p>
+                        `,
+                        video_url: 'https://www.youtube.com/embed/Zq4D1T1bE2g', // Placeholder: Video tentang Ide Pokok
+                        audio_url: '', // New: Placeholder for audio
+                        quiz: [
+                            { question: 'Apa yang dimaksud dengan ide pokok?', options: ['Kalimat pertama', 'Gagasan utama paragraf', 'Penjelasan tambahan', 'Kesimpulan cerita'], correct_answer_index: 1 },
+                            { question: 'Dimana biasanya ide pokok ditemukan?', options: ['Hanya di awal paragraf', 'Hanya di akhir paragraf', 'Di awal atau akhir paragraf', 'Di tengah paragraf'], correct_answer_index: 2 },
+                            { question: 'Jika sebuah paragraf menjelaskan tentang jenis-jenis bunga, ide pokoknya kemungkinan besar tentang...', options: ['Cara menanam bunga', 'Bunga sebagai hiasan', 'Jenis-jenis bunga', 'Warna-warni bunga'], correct_answer_index: 2 },
+                            { question: 'Untuk menemukan ide pokok, kita harus membaca paragraf dengan...', options: ['Cepat', 'Terburu-buru', 'Saksama', 'Tidak peduli'], correct_answer_index: 2 },
+                            { question: 'Kalimat yang mewakili seluruh isi paragraf disebut juga...', options: ['Kalimat penjelas', 'Kalimat utama', 'Kalimat tambahan', 'Kalimat penyimpul'], correct_answer_index: 1 }
+                        ]
+                    },
+                    {
+                        id: 'b-indonesia-bab2', title: 'Bab 2: Menulis Teks Prosedur',
+                        content_summary: 'Mempelajari langkah-langkah dalam menulis teks prosedur untuk membuat sesuatu atau melakukan suatu kegiatan.',
+                        material_content: `
+                            <h3 class="text-2xl font-bold text-gray-800 mb-4">Membuat Teks Prosedur: Panduan Langkah Demi Langkah</h3>
+                            <p class="mb-4">Pernahkah kalian membaca resep masakan, petunjuk cara merakit mainan, atau instruksi cara menggunakan alat elektronik? Itu semua adalah contoh <strong>teks prosedur</strong>. Teks prosedur adalah teks yang berisi cara, tujuan, dan langkah-langkah untuk membuat atau melakukan sesuatu.</p>
+                            <h4 class="font-semibold text-xl mb-3">Tujuan Teks Prosedur:</h4>
+                            <ul class="list-disc list-inside mb-4">
+                                <li>Memberikan petunjuk agar pembaca dapat melakukan atau membuat sesuatu dengan tepat.</li>
+                                <li>Menjelaskan langkah-langkah secara berurutan.</li>
+                            </ul>
+                            <h4 class="font-semibold text-xl mb-3">Struktur Teks Prosedur:</h4>
+                            <ol class="list-decimal list-inside mb-4 pl-4">
+                                <li><strong>Tujuan:</strong> Bagian ini menjelaskan apa yang akan dibuat atau dilakukan (misalnya, "Cara Membuat Nasi Goreng").</li>
+                                <li><strong>Alat dan Bahan (jika ada):</strong> Daftar alat dan bahan yang dibutuhkan.</li>
+                                <li><strong>Langkah-langkah:</strong> Urutan langkah-langkah yang harus dilakukan secara berurutan. Gunakan kata kerja perintah (contoh: "Masukkan...", "Aduk...", "Potong...").</li>
+                                <li><strong>Penutup (opsional):</strong> Berisi kesimpulan atau hasil akhir.</li>
+                            </ol>
+                            <p class="mb-4">Contoh Judul Teks Prosedur: "Cara Membuat Layang-layang", "Langkah-langkah Mencuci Tangan dengan Benar".</p>
+                            <p class="italic text-sm text-gray-500">Sumber: Diadaptasi dari materi Bahasa Indonesia Kelas 5 SD (Kurikulum Merdeka).</p>
+                        `,
+                        video_url: 'https://www.youtube.com/embed/fW_D_m-M2uY', // Placeholder: Video tentang Teks Prosedur
+                        audio_url: '', // New: Placeholder for audio
+                        quiz: [
+                            { question: 'Apa tujuan utama teks prosedur?', options: ['Untuk menghibur', 'Untuk memberikan petunjuk cara melakukan sesuatu', 'Untuk menceritakan pengalaman', 'Untuk memberikan pendapat'], correct_answer_index: 1 },
+                            { question: 'Bagian apa yang berisi urutan langkah-langkah dalam teks prosedur?', options: ['Tujuan', 'Alat dan Bahan', 'Langkah-langkah', 'Penutup'], correct_answer_index: 2 },
+                            { question: 'Contoh kata kerja perintah yang biasa digunakan dalam teks prosedur adalah...', options: ['Makan', 'Tidur', 'Potong', 'Duduk'], correct_answer_index: 2 },
+                            { question: 'Jika judul teksnya "Cara Membuat Jus Jeruk", ini termasuk jenis teks apa?', options: ['Narasi', 'Deskripsi', 'Prosedur', 'Puisi'], correct_answer_index: 2 },
+                            { question: 'Teks prosedur membantu pembaca untuk melakukan sesuatu dengan...', options: ['Cepat', 'Tepat', 'Sembarangan', 'Bingung'], correct_answer_index: 1 }
+                        ]
+                    }
+                ],
+                'matematika': [
+                    {
+                        id: 'matematika-bab1', title: 'Bab 1: Operasi Hitung Pecahan',
+                        content_summary: 'Mempelajari penjumlahan, pengurangan, perkalian, dan pembagian pecahan biasa serta campuran.',
+                        material_content: `
+                            <h3 class="text-2xl font-bold text-gray-800 mb-4">Mari Berhitung Pecahan!</h3>
+                            <p class="mb-4">Anak-anak, pecahan adalah bagian dari keseluruhan. Contohnya, jika sebuah pizza dibagi 4, satu potongnya adalah 1/4 (satu per empat).</p>
+                            <h4 class="font-semibold text-xl mb-3">1. Penjumlahan dan Pengurangan Pecahan</h4>
+                            <p class="mb-4">Untuk menjumlahkan atau mengurangkan pecahan, penyebutnya (angka di bawah) harus sama. Jika berbeda, samakan dulu dengan mencari KPK (Kelipatan Persekutuan Terkecil) dari penyebutnya.</p>
+                            <p class="mb-2">Contoh: $\\frac{1}{2} + \\frac{1}{4}$</p>
+                            <p class="mb-4">KPK dari 2 dan 4 adalah 4. Maka: $\\frac{2}{4} + \\frac{1}{4} = \\frac{3}{4}$</p>
+
+                            <h4 class="font-semibold text-xl mb-3">2. Perkalian Pecahan</h4>
+                            <p class="mb-4">Untuk mengalikan pecahan, kalikan pembilang (angka di atas) dengan pembilang, dan penyebut dengan penyebut.</p>
+                            <p class="mb-2">Contoh: $\\frac{2}{3} \\times \\frac{1}{2}$</p>
+                            <p class="mb-4">Maka: $\\frac{2 \\times 1}{3 \\times 2} = \\frac{2}{6} = \\frac{1}{3}$</p>
+
+                            <h4 class="font-semibold text-xl mb-3">3. Pembagian Pecahan</h4>
+                            <p class="mb-4">Untuk membagi pecahan, ubah pembagian menjadi perkalian dengan membalik pecahan kedua.</p>
+                            <p class="mb-2">Contoh: $\\frac{3}{4} \\div \\frac{1}{2}$</p>
+                            <p class="mb-4">Maka: $\\frac{3}{4} \\times \\frac{2}{1} = \\frac{6}{4} = 1\\frac{2}{4} = 1\\frac{1}{2}$</p>
+                            <p class="italic text-sm text-gray-500">Sumber: Diadaptasi dari materi Matematika Kelas 5 SD (Kurikulum Merdeka).</p>
+                        `,
+                        video_url: 'https://www.youtube.com/embed/fW_D_m-M2uY', // Placeholder: Video tentang Operasi Hitung Pecahan
+                        audio_url: '', // New: Placeholder for audio
+                        quiz: [
+                            { question: 'Hasil dari $\\frac{1}{3} + \\frac{1}{6}$ adalah...', options: ['$\\frac{2}{9}$', '$\\frac{2}{6}$', '$\\frac{3}{6}$', '$\\frac{1}{2}$'], correct_answer_index: 3 },
+                            { question: 'Berapa hasil dari $\\frac{4}{5} - \\frac{1}{5}$?', options: ['$\\frac{3}{0}$', '$\\frac{3}{5}$', '$\\frac{5}{5}$', '$\\frac{4}{10}$'], correct_answer_index: 1 },
+                            { question: 'Hasil dari $\\frac{1}{2} \\times \\frac{3}{4}$ adalah...', options: ['$\\frac{3}{8}$', '$\\frac{4}{6}$', '$\\frac{1}{4}$', '$\\frac{2}{6}$'], correct_answer_index: 0 },
+                            { question: 'Berapa hasil dari $\\frac{2}{5} \\div \\frac{1}{3}$?', options: ['$\\frac{2}{15}$', '$\\frac{5}{6}$', '$\\frac{6}{5}$', '$\\frac{1}{2}$'], correct_answer_index: 2 },
+                            { question: 'Pecahan $\\frac{3}{4}$ jika diubah ke bentuk desimal menjadi...', options: ['0.34', '0.43', '0.75', '0.25'], correct_answer_index: 2 }
+                        ]
+                    },
+                    {
+                        id: 'matematika-bab2', title: 'Bab 2: Volume Bangun Ruang',
+                        content_summary: 'Menghitung volume berbagai bangun ruang seperti kubus dan balok.',
+                        material_content: `
+                            <h3 class="text-2xl font-bold text-gray-800 mb-4">Volume: Mengisi Ruang</h3>
+                            <p class="mb-4"><strong>Volume</strong> adalah ukuran seberapa banyak ruang yang ditempati oleh suatu benda. Bayangkan sebuah kotak, volume adalah seberapa banyak air, pasir, atau barang yang bisa muat di dalamnya. Satuan volume biasanya menggunakan kubik, seperti cm³ (sentimeter kubik) atau m³ (meter kubik).</p>
+                            <h4 class="font-semibold text-xl mb-3">1. Volume Kubus</h4>
+                            <p class="mb-4"><strong>Kubus</strong> adalah bangun ruang yang semua sisinya berbentuk persegi dan ukurannya sama. Rumus volume kubus sangat mudah:</p>
+                            <p class="mb-2"><strong>Volume Kubus = sisi x sisi x sisi</strong></p>
+                            <p class="mb-4">Contoh: Sebuah kubus memiliki sisi 4 cm. Maka volumenya = $4 \\text{ cm} \\times 4 \\text{ cm} \\times 4 \\text{ cm} = 64 \\text{ cm}^3$</p>
+
+                            <h4 class="font-semibold text-xl mb-3">2. Volume Balok</h4>
+                            <p class="mb-4"><strong>Balok</strong> adalah bangun ruang yang memiliki panjang, lebar, dan tinggi yang bisa berbeda. Contoh balok adalah kotak pensil atau lemari.</p>
+                            <p class="mb-2"><strong>Volume Balok = panjang x lebar x tinggi</strong></p>
+                            <p class="mb-4">Contoh: Sebuah balok memiliki panjang 5 cm, lebar 3 cm, dan tinggi 2 cm. Maka volumenya = $5 \\text{ cm} \\times 3 \\text{ cm} \\times 2 \\text{ cm} = 30 \\text{ cm}^3$</p>
+                            <p class="italic text-sm text-gray-500">Sumber: Diadaptasi dari materi Matematika Kelas 5 SD (Kurikulum Merdeka).</p>
+                        `,
+                        video_url: 'https://www.youtube.com/embed/zN871a2lqM0', // Placeholder: Video tentang Volume Kubus dan Balok
+                        audio_url: '', // New: Placeholder for audio
+                        quiz: [
+                            { question: 'Apa rumus untuk menghitung volume kubus?', options: ['Sisi x Sisi', 'Panjang x Lebar', 'Sisi x Sisi x Sisi', 'Alas x Tinggi'], correct_answer_index: 2 },
+                            { question: 'Jika sebuah kubus memiliki panjang sisi 3 cm, berapakah volumenya?', options: ['9 cm³', '12 cm³', '27 cm³', '36 cm³'], correct_answer_index: 2 },
+                            { question: 'Sebuah balok memiliki panjang 6 cm, lebar 2 cm, dan tinggi 4 cm. Berapakah volumenya?', options: ['12 cm³', '24 cm³', '48 cm³', '52 cm³'], correct_answer_index: 2 },
+                            { question: 'Satuan yang tepat untuk menyatakan volume adalah...', options: ['cm', 'cm²', 'cm³', 'gram'], correct_answer_index: 2 },
+                            { question: 'Benda di bawah ini yang berbentuk balok adalah...', options: ['Bola', 'Pir', 'Buku', 'Kelereng'], correct_answer_index: 2 }
+                        ]
+                    }
+                ],
+                'ipas': [
+                    {
+                        id: 'ipas-bab1', title: 'Bab 1: Rantai Makanan',
+                        content_summary: 'Memahami hubungan makan dan dimakan antar makhluk hidup dalam ekosistem.',
+                        material_content: `
+                            <h3 class="text-2xl font-bold text-gray-800 mb-4">Rantai Makanan: Siapa Makan Siapa?</h3>
+                            <p class="mb-4">Anak-anak, di alam ini, semua makhluk hidup saling membutuhkan, terutama dalam hal makanan. Hubungan makan dan dimakan antar makhluk hidup secara berurutan ini disebut <strong>rantai makanan</strong>.</p>
+                            <p class="mb-4">Setiap rantai makanan dimulai dari produsen dan berakhir pada pengurai. Mari kita kenali bagian-bagiannya:</p>
+                            <ol class="list-decimal list-inside mb-4 pl-4">
+                                <li><strong>Produsen:</strong> Makhluk hidup yang bisa membuat makanannya sendiri, biasanya adalah tumbuhan (melalui fotosintesis). Contoh: padi, rumput, pohon.</li>
+                                <li><strong>Konsumen Primer (Konsumen Tingkat I):</strong> Hewan yang memakan produsen (herbivora). Contoh: tikus (makan padi), sapi (makan rumput).</li>
+                                <li><strong>Konsumen Sekunder (Konsumen Tingkat II):</strong> Hewan yang memakan konsumen primer (karnivora atau omnivora). Contoh: ular (makan tikus), ayam (makan serangga).</li>
+                                <li><strong>Konsumen Tersier (Konsumen Tingkat III):</strong> Hewan yang memakan konsumen sekunder. Contoh: elang (makan ular).</li>
+                                <li><strong>Pengurai (Dekomposer):</strong> Makhluk hidup yang menguraikan sisa-sisa makhluk hidup yang sudah mati. Contoh: bakteri, jamur. Mereka mengembalikan nutrisi ke tanah.</li>
+                            </ol>
+                            <p class="mb-4">Contoh rantai makanan sederhana: Padi (Produsen) &#8594; Tikus (Konsumen I) &#8594; Ular (Konsumen II) &#8594; Elang (Konsumen III) &#8594; Bakteri/Jamur (Pengurai).</p>
+                            <p class="italic text-sm text-gray-500">Sumber: Diadaptasi dari materi IPAS Kelas 5 SD (Kurikulum Merdeka).</p>
+                        `,
+                        video_url: 'https://www.youtube.com/embed/Km1h0xH6Hw8', // Placeholder: Video tentang Rantai Makanan
+                        audio_url: '', // New: Placeholder for audio
+                        quiz: [
+                            { question: 'Hubungan makan dan dimakan antar makhluk hidup secara berurutan disebut...', options: ['Siklus air', 'Rantai makanan', 'Jaring-jaring makanan', 'Daur hidup'], correct_answer_index: 1 },
+                            { question: 'Siapa yang disebut produsen dalam rantai makanan?', options: ['Hewan', 'Tumbuhan', 'Manusia', 'Jamur'], correct_answer_index: 1 },
+                            { question: 'Dalam rantai makanan padi -> tikus -> ular -> elang, siapa yang menjadi konsumen tingkat 1?', options: ['Padi', 'Tikus', 'Ular', 'Elang'], correct_answer_index: 1 },
+                            { question: 'Organisme yang menguraikan sisa-sisa makhluk hidup yang sudah mati adalah...', options: ['Produsen', 'Konsumen', 'Herbivora', 'Pengurai'], correct_answer_index: 3 },
+                            { question: 'Jika tikus musnah dari rantai makanan padi -> tikus -> ular -> elang, apa yang akan terjadi pada ular?', options: ['Populasi ular akan bertambah', 'Ular akan makan padi', 'Populasi ular akan berkurang', 'Ular akan menjadi produsen'], correct_answer_index: 2 }
+                        ]
+                    },
+                    {
+                        id: 'ipas-bab2', title: 'Bab 2: Energi dan Perubahannya',
+                        content_summary: 'Mempelajari berbagai bentuk energi dan bagaimana energi dapat berubah dari satu bentuk ke bentuk lainnya.',
+                        material_content: `
+                            <h3 class="text-2xl font-bold text-gray-800 mb-4">Energi: Kekuatan yang Menggerakkan Dunia</h3>
+                            <p class="mb-4">Anak-anak, <strong>energi</strong> adalah kemampuan untuk melakukan usaha atau kerja. Segala sesuatu yang bergerak, menghasilkan panas, atau menghasilkan cahaya, membutuhkan energi. Kita juga butuh energi untuk belajar, bermain, dan beraktivitas.</p>
+                            <h4 class="font-semibold text-xl mb-3">Bentuk-bentuk Energi:</h4>
+                            <ul class="list-disc list-inside mb-4">
+                                <li><strong>Energi Cahaya:</strong> Energi yang menghasilkan cahaya, contoh: matahari, lampu.</li>
+                                <li><strong>Energi Panas (Kalor):</strong> Energi yang menghasilkan panas, contoh: api, setrika.</li>
+                                <li><strong>Energi Gerak (Kinetik):</strong> Energi yang dimiliki benda bergerak, contoh: angin, air mengalir.</li>
+                                <li><strong>Energi Bunyi:</strong> Energi yang menghasilkan suara, contoh: gitar, klakson.</li>
+                                <li><strong>Energi Listrik:</strong> Energi yang menggerakkan peralatan elektronik, contoh: listrik dari PLN.</li>
+                                <li><strong>Energi Kimia:</strong> Energi yang tersimpan dalam makanan, baterai, atau bahan bakar.</li>
+                            </ul>
+                            <h4 class="font-semibold text-xl mb-3">Perubahan Energi</h4>
+                            <p class="mb-4">Energi tidak bisa diciptakan atau dimusnahkan, tapi bisa berubah bentuk. Ini disebut <strong>Hukum Kekekalan Energi</strong>.</p>
+                            <ul class="list-disc list-inside mb-4">
+                                <li>Setrika: Energi listrik menjadi energi panas.</li>
+                                <li>Lampu: Energi listrik menjadi energi cahaya dan sedikit panas.</li>
+                                <li>Kipas angin: Energi listrik menjadi energi gerak.</li>
+                                <li>Berbicara: Energi kimia (dari makanan) menjadi energi bunyi.</li>
+                            </ul>
+                            <p class="italic text-sm text-gray-500">Sumber: Diadaptasi dari materi IPAS Kelas 5 SD (Kurikulum Merdeka).</p>
+                        `,
+                        video_url: 'https://www.youtube.com/embed/2_mD89XJp4U', // Placeholder: Video tentang Energi dan Perubahannya
+                        audio_url: '', // New: Placeholder for audio
+                        quiz: [
+                            { question: 'Apa yang dimaksud dengan energi?', options: ['Kemampuan untuk tidur', 'Kemampuan untuk melakukan kerja', 'Kemampuan untuk makan', 'Kemampuan untuk bermain'], correct_answer_index: 1 },
+                            { question: 'Energi yang berasal dari matahari adalah energi...', options: ['Gerak', 'Panas', 'Surya (cahaya)', 'Kimia'], correct_answer_index: 2 },
+                            { question: 'Perubahan energi yang terjadi pada setrika adalah...', options: ['Listrik menjadi gerak', 'Kimia menjadi panas', 'Listrik menjadi panas', 'Suara menjadi listrik'], correct_answer_index: 2 },
+                            { question: 'Energi yang tersimpan dalam makanan disebut energi...', options: ['Listrik', 'Gerak', 'Cahaya', 'Kimia'], correct_answer_index: 3 },
+                            { question: 'Ketika kipas angin dinyalakan, terjadi perubahan energi dari listrik menjadi...', options: ['Cahaya', 'Bunyi', 'Gerak', 'Panas'], correct_answer_index: 2 }
+                        ]
+                    }
+                ]
+            },
+            currentView: 'subjects', // 'subjects', 'chapters', 'material', 'quiz'
+            currentSubjectId: null,
+            currentChapterId: null,
+            currentQuiz: {
+                questions: [],
+                currentQuestionIndex: 0,
+                score: 0
+            },
+            settingsPassword: 'adminpassword', // Default password for settings
+            currentUser: { // New property for user authentication
+                isSettingsAdmin: false // True when settings are open and password verified
+            }
+        };
+
+        // Load data from localStorage or use defaultAppData
+        let appData = loadData() || defaultAppData;
+
+        // --- DOM Elements ---
+        const subjectListSection = document.getElementById('subjectList');
+        const chapterListContainer = document.getElementById('chapterListContainer');
+        const backToSubjectsBtn = document.getElementById('backToSubjectsBtn');
+        const chapterSubjectTitle = document.getElementById('chapterSubjectTitle');
+        const chapterList = document.getElementById('chapterList');
+
+        const materialContainer = document.getElementById('materialContainer');
+        const backToChaptersFromMaterialBtn = document.getElementById('backToChaptersFromMaterialBtn');
+        const materialChapterTitle = document.getElementById('materialChapterTitle');
+        const materialVideo = document.getElementById('materialVideo');
+        const materialAudio = document.getElementById('materialAudio'); // New audio element
+        const materialContent = document.getElementById('materialContent');
+        const startQuizFromMaterialBtn = document.getElementById('startQuizFromMaterialBtn');
+
+        const quizContainer = document.getElementById('quizContainer');
+        const backToMaterialBtn = document.getElementById('backToMaterialBtn');
+        const quizChapterTitle = document.getElementById('quizChapterTitle');
+        const quizQuestionSection = document.getElementById('quizQuestion'); // Renamed for clarity
+        const questionText = document.getElementById('questionText');
+        const quizOptions = document.getElementById('quizOptions');
+        const quizFeedback = document.getElementById('quizFeedback');
+        const nextQuestionBtn = document.getElementById('nextQuestionBtn');
+        const viewResultBtn = document.getElementById('viewResultBtn');
+        const quizResult = document.getElementById('quizResult');
+
+        // --- Chat Elements ---
+        const chatButton = document.getElementById('chatButton');
+        const chatModal = document.getElementById('chatModal');
+        const closeChatButton = document.getElementById('closeChat');
+        const chatBody = document.getElementById('chatBody');
+        const chatInput = document.getElementById('chatInput');
+        const sendMessageButton = document.getElementById('sendMessage');
+
+        let chatHistory = []; // Stores the conversation history for the AI
+
+        // --- Navigation Buttons (new variables for explicit listeners) ---
+        const mapelButton = document.getElementById('mapelButton');
+        const tentangButton = document.getElementById('tentangButton');
+        const settingsButton = document.getElementById('settingsButton');
+        const bantuanButton = document.getElementById('bantuanButton');
+
+        // Added console log to check if settingsButton element is found
+        console.log('Settings Button element (initial check):', settingsButton); 
+
+        // --- Settings Elements ---
+        const settingsModal = document.getElementById('settingsModal');
+        const closeSettingsButton = document.getElementById('closeSettings');
+        const settingsContentWrapper = document.querySelector('.settings-content-wrapper'); // New wrapper element
+        const passwordInputSection = document.getElementById('passwordInputSection');
+        const settingsPasswordEntry = document.getElementById('settingsPasswordEntry');
+        const submitSettingsPasswordBtn = document.getElementById('submitSettingsPasswordBtn');
+        const authFeedback = document.getElementById('authFeedback');
+        const mainSettingsContent = document.getElementById('mainSettingsContent'); // Main content of settings modal
+
+        // Subject Management Elements
+        const selectSubjectToEdit = document.getElementById('selectSubjectToEdit');
+        const editSubjectBtn = document.getElementById('editSubjectBtn');
+        const deleteSubjectBtn = document.getElementById('deleteSubjectBtn');
+        const addNewSubjectBtn = document.getElementById('addNewSubjectBtn');
+        const subjectEditForm = document.getElementById('subjectEditForm');
+        const editSubjectName = document.getElementById('editSubjectName');
+        const editSubjectDescription = document.getElementById('editSubjectDescription');
+        const saveSubjectChangesBtn = document.getElementById('saveSubjectChangesBtn');
+
+        // Chapter Management Elements
+        const selectSubjectForChapters = document.getElementById('selectSubjectForChapters');
+        const selectChapterToEdit = document.getElementById('selectChapterToEdit');
+        const editChapterBtn = document.getElementById('editChapterBtn');
+        const deleteChapterBtn = document.getElementById('deleteChapterBtn');
+        const addNewChapterBtn = document.getElementById('addNewChapterBtn');
+        const chapterEditForm = document.getElementById('chapterEditForm');
+        const editChapterTitle = document.getElementById('editChapterTitle');
+        const editChapterSummary = document.getElementById('editChapterSummary');
+        const editMaterialContent = document.getElementById('editMaterialContent');
+        const editVideoUrl = document.getElementById('editVideoUrl');
+        const editAudioUrl = document.getElementById('editAudioUrl'); // New audio URL input
+        const quizQuestionsEditArea = document.getElementById('quizQuestionsEditArea');
+        const addQuizQuestionBtn = document.getElementById('addQuizQuestionBtn'); 
+        const saveChapterChangesBtn = document.getElementById('saveChapterChangesBtn');
+
+        // New Password Management Elements
+        const oldSettingsPasswordInput = document.getElementById('oldSettingsPasswordInput');
+        const newSettingsPasswordInput = document.getElementById('newSettingsPasswordInput');
+        const confirmNewSettingsPasswordInput = document.getElementById('confirmNewSettingsPasswordInput');
+        const saveNewSettingsPasswordBtn = document.getElementById('saveNewSettingsPasswordBtn');
+        const passwordChangeFeedback = document.getElementById('passwordChangeFeedback');
+
+        // --- Custom Input Modal Elements (New!) ---
+        const customInputModal = document.getElementById('customInputModal');
+        const customInputCloseButton = document.getElementById('customInputCloseButton');
+        const customInputTitle = document.getElementById('customInputTitle');
+        const customInputField = document.getElementById('customInputField');
+        const customInputFeedback = document.getElementById('customInputFeedback');
+        const customInputCancelBtn = document.getElementById('customInputCancelBtn');
+        const customInputSubmitBtn = document.getElementById('customInputSubmitBtn');
+        let customInputCallback = null; // To store the callback function
+
+        // --- Content Sections ---
+        const tentangSection = document.getElementById('tentang');
+        const bantuanSection = document.getElementById('bantuan');
+
+
+        // --- Data Persistence Functions ---
+        function saveData() {
+            localStorage.setItem('rumahBelajarAppData', JSON.stringify(appData));
+            console.log('Data saved to localStorage.');
+        }
+
+        function loadData() {
+            const storedData = localStorage.getItem('rumahBelajarAppData');
+            if (storedData) {
+                console.log('Data loaded from localStorage.');
+                return JSON.parse(storedData);
+            }
+            return null;
+        }
+
+        // --- Authentication Functions for Settings ---
+        if (settingsButton) { // Ensure button exists before adding listener
+            settingsButton.addEventListener('click', () => {
+                console.log('Pengaturan button clicked. isSettingsAdmin:', appData.currentUser.isSettingsAdmin); // Debug log
+                hideAllSections(); // Hide other main sections when settings is opened
+
+                settingsModal.classList.add('active'); // Always activate the modal wrapper
+
+                if (appData.currentUser.isSettingsAdmin) {
+                    passwordInputSection.classList.add('hidden'); // Hide password input if already authenticated
+                    mainSettingsContent.classList.remove('hidden'); // Show main settings content
+                    renderSettingsSubjectSelect(); // Populate subject dropdowns when opening
+                    subjectEditForm.classList.add('hidden'); // Hide forms initially
+                    chapterEditForm.classList.add('hidden');
+                    // settingsFeedback.textContent = ''; // Clear general settings feedback on re-open
+                    passwordChangeFeedback.textContent = ''; // Clear password feedback too
+                    // Clear password input fields upon opening
+                    oldSettingsPasswordInput.value = '';
+                    newSettingsPasswordInput.value = '';
+                    confirmNewSettingsPasswordInput.value = '';
+                    authFeedback.textContent = ''; // Clear auth feedback on re-open
+                } else {
+                    passwordInputSection.classList.remove('hidden'); // Show password input
+                    mainSettingsContent.classList.add('hidden'); // Hide main settings content
+                    settingsPasswordEntry.value = ''; // Clear password field
+                    settingsPasswordEntry.focus(); // Focus on password input
+                    authFeedback.textContent = ''; // Clear previous authentication feedback
+                }
+            });
+        } else {
+            console.error('Settings button element not found!');
+        }
+
+        // Handle password submission for settings access
+        submitSettingsPasswordBtn.addEventListener('click', () => {
+            const enteredPassword = settingsPasswordEntry.value;
+            authFeedback.classList.remove('text-green-600', 'text-red-600'); // Reset feedback color
+
+            if (enteredPassword === appData.settingsPassword) {
+                appData.currentUser.isSettingsAdmin = true;
+                passwordInputSection.classList.add('hidden'); // Hide password input
+                mainSettingsContent.classList.remove('hidden'); // Show main settings content
+                renderSettingsSubjectSelect();
+                subjectEditForm.classList.add('hidden');
+                chapterEditForm.classList.add('hidden');
+                authFeedback.textContent = 'Akses pengaturan berhasil dibuka!'; // Display feedback
+                authFeedback.classList.add('text-green-600');
+                passwordChangeFeedback.textContent = ''; // Clear password feedback for the change section
+            } else {
+                authFeedback.textContent = 'Password salah. Akses ditolak.'; // Display feedback
+                authFeedback.classList.add('text-red-600');
+                settingsPasswordEntry.value = ''; // Clear password field
+                settingsPasswordEntry.focus(); // Re-focus for retry
+            }
+        });
+
+        // Allow 'Enter' key to submit password
+        settingsPasswordEntry.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                submitSettingsPasswordBtn.click();
+            }
+        });
+
+
+        closeSettingsButton.addEventListener('click', () => {
+            settingsModal.classList.remove('active');
+            appData.currentUser.isSettingsAdmin = false; // Revoke settings admin access on close
+            saveData(); // Save updated state
+        });
+
+        saveNewSettingsPasswordBtn.addEventListener('click', () => {
+            const oldPass = oldSettingsPasswordInput.value;
+            const newPass = newSettingsPasswordInput.value;
+            const confirmNewPass = confirmNewSettingsPasswordInput.value;
+
+            passwordChangeFeedback.classList.remove('text-green-600', 'text-red-600'); // Reset feedback color
+
+            if (oldPass === '') {
+                passwordChangeFeedback.textContent = 'Password lama tidak boleh kosong.';
+                passwordChangeFeedback.classList.add('text-red-600');
+                return;
+            }
+
+            if (newPass === '') {
+                passwordChangeFeedback.textContent = 'Password baru tidak boleh kosong.';
+                passwordChangeFeedback.classList.add('text-red-600');
+                return;
+            }
+
+            if (oldPass !== appData.settingsPassword) {
+                passwordChangeFeedback.textContent = 'Password lama salah.';
+                passwordChangeFeedback.classList.add('text-red-600');
+                return;
+            }
+
+            if (newPass !== confirmNewPass) {
+                passwordChangeFeedback.textContent = 'Password baru dan konfirmasi tidak cocok.';
+                passwordChangeFeedback.classList.add('text-red-600');
+                return;
+            }
+
+            appData.settingsPassword = newPass;
+            saveData();
+            passwordChangeFeedback.textContent = 'Password pengaturan berhasil diubah!';
+            passwordChangeFeedback.classList.add('text-green-600');
+            
+            // Clear fields after successful change
+            oldSettingsPasswordInput.value = '';
+            newSettingsPasswordInput.value = '';
+            confirmNewSettingsPasswordInput.value = '';
+        });
+
+
+        // --- Fungsi Navigasi & Render ---
+
+        // Helper function to hide all main sections
+        function hideAllSections() {
+            subjectListSection.classList.add('hidden');
+            chapterListContainer.classList.add('hidden');
+            materialContainer.classList.add('hidden');
+            quizContainer.classList.add('hidden');
+            tentangSection.classList.add('hidden'); // Hide about section
+            bantuanSection.classList.add('hidden'); // Hide help section
+        }
+
+        // Menampilkan daftar mata pelajaran
+        function renderSubjects() {
+            hideAllSections();
+            subjectListSection.classList.remove('hidden');
+            appData.currentView = 'subjects';
+
+            subjectListSection.innerHTML = ''; // Clear previous content
+            appData.subjects.forEach(subject => {
+                const subjectDiv = document.createElement('div');
+                subjectDiv.classList.add('subject', 'bg-white', 'rounded-xl', 'shadow-md', 'p-6', 'text-center', 'transform', 'hover:scale-105', 'transition', 'duration-300', 'ease-in-out', 'border', 'border-gray-100', 'cursor-pointer');
+                subjectDiv.innerHTML = `
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2">${subject.name}</h3>
+                    <p class="text-gray-600">${subject.description}</p>
+                `;
+                subjectDiv.addEventListener('click', () => renderChapters(subject.id));
+                subjectListSection.appendChild(subjectDiv);
+            });
+        }
+
+        // Menampilkan daftar bab untuk mata pelajaran tertentu
+        function renderChapters(subjectId) {
+            hideAllSections();
+            chapterListContainer.classList.remove('hidden');
+            appData.currentView = 'chapters';
+            appData.currentSubjectId = subjectId; // Save current subject for navigation
+
+            chapterList.innerHTML = ''; // Clear previous content
+
+            const selectedSubject = appData.subjects.find(s => s.id === subjectId);
+            chapterSubjectTitle.textContent = `Bab-bab ${selectedSubject ? selectedSubject.name : ''}`;
+            
+            const chaptersForSubject = appData.chapters[subjectId] || [];
+            if (chaptersForSubject.length === 0) {
+                chapterList.innerHTML = '<p class="text-center text-gray-600 col-span-full">Belum ada bab untuk mata pelajaran ini.</p>';
+                return;
+            }
+
+            chaptersForSubject.forEach(chapter => {
+                const chapterDiv = document.createElement('div');
+                chapterDiv.classList.add('bg-white', 'rounded-xl', 'shadow-md', 'p-6', 'text-center', 'transform', 'hover:scale-105', 'transition', 'duration-300', 'ease-in-out', 'border', 'border-gray-100', 'cursor-pointer');
+                chapterDiv.innerHTML = `
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">${chapter.title}</h3>
+                    <p class="text-gray-600 text-sm mb-4">${chapter.content_summary}</p>
+                    <button class="read-material-btn bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-full">
+                        Baca Materi <i class="fas fa-book-open ml-2"></i>
+                    </button>
+                `;
+                chapterDiv.querySelector('.read-material-btn').addEventListener('click', (event) => {
+                    event.stopPropagation(); // Prevent chapterDiv click from firing
+                    showChapterDetails(chapter.id);
+                });
+                chapterList.appendChild(chapterDiv);
+            });
+        }
+
+        // Menampilkan detail materi dan video untuk bab tertentu
+        function showChapterDetails(chapterId) {
+            hideAllSections();
+            materialContainer.classList.remove('hidden');
+            appData.currentView = 'material';
+            appData.currentChapterId = chapterId; // Save current chapter for navigation
+
+            const selectedSubject = appData.subjects.find(s => s.id === appData.currentSubjectId);
+            const selectedChapter = appData.chapters[appData.currentSubjectId].find(c => c.id === chapterId);
+
+            if (!selectedChapter) {
+                // Handle case where chapter not found (shouldn't happen with correct data)
+                console.error('Chapter not found:', chapterId);
+                renderChapters(appData.currentSubjectId); // Go back to chapters list
+                return;
+            }
+
+            materialChapterTitle.textContent = `${selectedSubject ? selectedSubject.name : ''} - ${selectedChapter.title}`;
+            materialContent.innerHTML = selectedChapter.material_content;
+            
+            // Embed YouTube video
+            if (selectedChapter.video_url) {
+                materialVideo.innerHTML = `
+                    <iframe 
+                        src="${selectedChapter.video_url}" 
+                        title="YouTube video player" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen
+                        class="w-full h-full rounded-xl"
+                    ></iframe>
+                `;
+            } else {
+                materialVideo.innerHTML = `<img src="https://placehold.co/400x225/E0F2FE/3B82F6?text=Video+Materi+Tidak+Tersedia" alt="Video Placeholder" class="w-full h-full object-cover rounded-xl">`;
+            }
+
+            // Embed Audio
+            if (selectedChapter.audio_url) {
+                materialAudio.innerHTML = `
+                    <audio controls class="w-full">
+                        <source src="${selectedChapter.audio_url}" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                `;
+            } else {
+                materialAudio.innerHTML = ''; // Clear audio if not present
+            }
+
+            // Set up "Mulai Kuis" button
+            startQuizFromMaterialBtn.onclick = () => startQuiz(chapterId);
+        }
+
+        // Memulai kuis untuk bab tertentu
+        function startQuiz(chapterId) {
+            hideAllSections();
+            quizContainer.classList.remove('hidden');
+            appData.currentView = 'quiz';
+
+            const selectedSubject = appData.subjects.find(s => s.id === appData.currentSubjectId);
+            const selectedChapter = appData.chapters[appData.currentSubjectId].find(c => c.id === chapterId);
+
+            quizChapterTitle.textContent = `Kuis: ${selectedSubject ? selectedSubject.name : ''} - ${selectedChapter ? selectedChapter.title : ''}`;
+            
+            appData.currentQuiz.questions = selectedChapter.quiz;
+            appData.currentQuiz.currentQuestionIndex = 0;
+            appData.currentQuiz.score = 0;
+
+            // Reset quiz display
+            quizFeedback.classList.add('hidden');
+            nextQuestionBtn.classList.add('hidden');
+            viewResultBtn.classList.add('hidden');
+            quizResult.classList.add('hidden');
+            quizResult.textContent = ''; // Clear previous results
+            quizQuestionSection.classList.remove('hidden'); // Ensure question section is visible
+
+            displayQuestion();
+        }
+
+        // Menampilkan pertanyaan kuis
+        function displayQuestion() {
+            const currentQ = appData.currentQuiz.questions[appData.currentQuiz.currentQuestionIndex];
+            questionText.innerHTML = `<span class="font-bold">Soal ${appData.currentQuiz.currentQuestionIndex + 1}/${appData.currentQuiz.questions.length}:</span> ${currentQ.question}`;
+            quizOptions.innerHTML = ''; // Clear previous options
+
+            currentQ.options.forEach((option, index) => {
+                const optionButton = document.createElement('button');
+                optionButton.classList.add('w-full', 'py-3', 'px-4', 'bg-gray-100', 'text-gray-800', 'rounded-lg', 'text-left', 'hover:bg-gray-200', 'transition', 'duration-200', 'border', 'border-gray-200');
+                optionButton.textContent = option;
+                optionButton.dataset.index = index;
+                optionButton.addEventListener('click', () => checkAnswer(index));
+                quizOptions.appendChild(optionButton);
+            });
+
+            // Hide next/result buttons until an answer is selected
+            nextQuestionBtn.classList.add('hidden');
+            viewResultBtn.classList.add('hidden');
+            quizFeedback.classList.add('hidden');
+
+            // Enable all options
+            Array.from(quizOptions.children).forEach(btn => {
+                btn.disabled = false;
+                btn.classList.remove('bg-green-200', 'bg-red-200', 'border-green-500', 'border-red-500');
+            });
+        }
+
+        // Memeriksa jawaban kuis
+        function checkAnswer(selectedIndex) {
+            const currentQ = appData.currentQuiz.questions[appData.currentQuiz.currentQuestionIndex];
+            const correctIndex = currentQ.correct_answer_index;
+            const allOptions = Array.from(quizOptions.children);
+
+            // Disable all options after selection
+            allOptions.forEach(btn => btn.disabled = true);
+
+            if (selectedIndex === correctIndex) {
+                appData.currentQuiz.score++;
+                quizFeedback.textContent = 'Benar! 🎉';
+                quizFeedback.classList.remove('text-red-600');
+                quizFeedback.classList.add('text-green-600');
+                allOptions[selectedIndex].classList.add('bg-green-200', 'border-green-500');
+            } else {
+                quizFeedback.textContent = `Salah. Jawaban yang benar adalah: ${currentQ.options[correctIndex]}`;
+                quizFeedback.classList.remove('text-green-600');
+                quizFeedback.classList.add('text-red-600');
+                allOptions[selectedIndex].classList.add('bg-red-200', 'border-red-500');
+                allOptions[correctIndex].classList.add('bg-green-200', 'border-green-500'); // Highlight correct answer
+            }
+            quizFeedback.classList.remove('hidden');
+
+            // Show next or view result button
+            if (appData.currentQuiz.currentQuestionIndex < appData.currentQuiz.questions.length - 1) {
+                nextQuestionBtn.classList.remove('hidden');
+            } else {
+                viewResultBtn.classList.remove('hidden');
+            }
+        }
+
+        // Melanjutkan ke pertanyaan berikutnya
+        nextQuestionBtn.addEventListener('click', () => {
+            appData.currentQuiz.currentQuestionIndex++;
+            displayQuestion();
+        });
+
+        // Menampilkan hasil kuis
+        viewResultBtn.addEventListener('click', () => {
+            quizQuestionSection.classList.add('hidden');
+            quizFeedback.classList.add('hidden');
+            nextQuestionBtn.classList.add('hidden');
+            viewResultBtn.classList.add('hidden');
+
+            quizResult.textContent = `Skor Anda: ${appData.currentQuiz.score} dari ${appData.currentQuiz.questions.length}`;
+            quizResult.classList.remove('hidden');
+        });
+
+
+        // --- Event Listeners Navigasi ---
+        backToSubjectsBtn.addEventListener('click', renderSubjects);
+        backToChaptersFromMaterialBtn.addEventListener('click', () => renderChapters(appData.currentSubjectId));
+        backToMaterialBtn.addEventListener('click', () => showChapterDetails(appData.currentChapterId));
+
+        // Event listeners for top navigation buttons
+        mapelButton.addEventListener('click', (event) => {
+            event.preventDefault();
+            hideAllSections(); // Ensure all other sections are hidden
+            renderSubjects(); // This function already makes subjectList visible
+            // Scroll to top of main content area
+            document.querySelector('main').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        tentangButton.addEventListener('click', (event) => {
+            event.preventDefault();
+            hideAllSections();
+            tentangSection.classList.remove('hidden');
+            appData.currentView = 'tentang';
+            tentangSection.scrollIntoView({ behavior: 'smooth' });
+        });
+
+        bantuanButton.addEventListener('click', (event) => {
+            event.preventDefault(); // Prevent default anchor link behavior initially
+            hideAllSections();
+            bantuanSection.classList.remove('hidden');
+            appData.currentView = 'bantuan';
+            // Smooth scroll to the help section if it's not at the top of the viewport
+            bantuanSection.scrollIntoView({ behavior: 'smooth' });
+        });
+
+
+        // --- Chat Functionality (Existing) ---
+        // Fungsi untuk membuka/menutup modal chat
+        chatButton.addEventListener('click', () => {
+            chatModal.classList.toggle('active');
+            chatModal.classList.toggle('hidden');
+            if (chatModal.classList.contains('active')) {
+                chatInput.focus();
+            }
+        });
+
+        closeChatButton.addEventListener('click', () => {
+            chatModal.classList.remove('active');
+            chatModal.classList.add('hidden');
+        });
+
+        // Fungsi untuk menambahkan pesan ke tampilan chat
+        function addMessage(sender, message) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('chat-message', sender);
+            messageDiv.innerHTML = `<div class="message-bubble">${message}</div>`;
+            chatBody.appendChild(messageDiv);
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        // Fungsi untuk menampilkan/menyembunyikan indikator mengetik
+        function showTypingIndicator() {
+            const typingDiv = document.createElement('div');
+            typingDiv.id = 'typingIndicator';
+            typingDiv.classList.add('chat-message', 'ai', 'typing-indicator');
+            typingDiv.innerHTML = `<div class="message-bubble"><span></span><span></span><span></span></div>`;
+            chatBody.appendChild(typingDiv);
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        function hideTypingIndicator() {
+            const typingIndicator = document.getElementById('typingIndicator');
+            if (typingIndicator) {
+                typingIndicator.remove();
+            }
+        }
+
+        // Fungsi untuk mengirim pesan ke AI
+        async function sendToAI(prompt) {
+            showTypingIndicator();
+            addMessage('user', prompt);
+
+            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+            const payload = { contents: chatHistory };
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+                hideTypingIndicator();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const aiResponse = result.candidates[0].content.parts[0].text;
+                    addMessage('ai', aiResponse);
+                    chatHistory.push({ role: "model", parts: [{ text: aiResponse }] });
+                } else {
+                    addMessage('ai', 'Maaf, saya tidak dapat memahami permintaan Anda. Bisakah Anda mengulanginya?');
+                }
+            } catch (error) {
+                console.error('Error calling Gemini API:', error);
+                hideTypingIndicator();
+                addMessage('ai', 'Maaf, terjadi kesalahan saat menghubungi Cikgu Tere. Silakan coba lagi nanti.');
+            }
+        }
+
+        sendMessageButton.addEventListener('click', () => {
+            const message = chatInput.value.trim();
+            if (message) {
+                sendToAI(message);
+                chatInput.value = '';
+            }
+        });
+
+        chatInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                sendMessageButton.click();
+            }
+        });
+
+        // Initial message from Cikgu Tere when the chat opens
+        if (chatHistory.length === 0) { // Only add initial message if chat history is empty
+            chatHistory.push({ role: "model", parts: [{ text: "Halo! Saya Cikgu Tere. Ada yang bisa saya bantu hari ini?" }] });
+        }
+
+
+        // --- Settings Functionality ---
+
+        // Open/Close Settings Modal
+        // Note: The settingsButton's click listener is now handled above for password protection.
+        // This is the common close logic.
+        closeSettingsButton.addEventListener('click', () => {
+            settingsModal.classList.remove('active');
+            appData.currentUser.isSettingsAdmin = false; // Revoke settings admin access on close
+            saveData(); // Save updated state
+        });
+
+        // Populate Subject dropdowns in settings
+        function renderSettingsSubjectSelect() {
+            selectSubjectToEdit.innerHTML = '<option value="">Pilih Mata Pelajaran</option>';
+            selectSubjectForChapters.innerHTML = '<option value="">Pilih Mata Pelajaran</option>';
+            appData.subjects.forEach(subject => {
+                const option1 = document.createElement('option');
+                option1.value = subject.id;
+                option1.textContent = subject.name;
+                selectSubjectToEdit.appendChild(option1);
+
+                const option2 = document.createElement('option');
+                option2.value = subject.id;
+                option2.textContent = subject.name;
+                selectSubjectForChapters.appendChild(option2);
+            });
+            // Reset chapter dropdown
+            selectChapterToEdit.innerHTML = '<option value="">Pilih Bab</option>';
+        }
+
+        // Handle subject selection to populate chapter dropdown
+        selectSubjectForChapters.addEventListener('change', (event) => {
+            const subjectId = event.target.value;
+            selectChapterToEdit.innerHTML = '<option value="">Pilih Bab</option>'; // Clear existing options
+            chapterEditForm.classList.add('hidden'); // Hide chapter edit form
+
+            if (subjectId && appData.chapters[subjectId]) {
+                appData.chapters[subjectId].forEach(chapter => {
+                    const option = document.createElement('option');
+                    option.value = chapter.id;
+                    option.textContent = chapter.title;
+                    selectChapterToEdit.appendChild(option);
+                });
+            }
+        });
+
+        // Edit Subject
+        editSubjectBtn.addEventListener('click', () => {
+            const subjectId = selectSubjectToEdit.value;
+            if (!subjectId) {
+                // Display feedback directly within the settings modal, not in main settingsFeedback
+                authFeedback.textContent = 'Pilih mata pelajaran untuk diedit.'; // Using authFeedback for general settings errors now
+                authFeedback.className = 'text-center text-red-600 font-bold mt-4';
+                return;
+            }
+            authFeedback.textContent = ''; // Clear auth feedback when a valid action starts
+            const subject = appData.subjects.find(s => s.id === subjectId);
+            if (subject) {
+                editSubjectName.value = subject.name;
+                editSubjectDescription.value = subject.description;
+                subjectEditForm.dataset.subjectId = subject.id; // Store ID for saving
+                subjectEditForm.classList.remove('hidden');
+                chapterEditForm.classList.add('hidden'); // Hide chapter form if subject is edited
+            }
+        });
+
+        // Save Subject Changes
+        saveSubjectChangesBtn.addEventListener('click', () => {
+            const subjectId = subjectEditForm.dataset.subjectId;
+            const newName = editSubjectName.value.trim();
+            const newDescription = editSubjectDescription.value.trim();
+
+            if (!newName) {
+                authFeedback.textContent = 'Nama mata pelajaran tidak boleh kosong.';
+                authFeedback.className = 'text-center text-red-600 font-bold mt-4';
+                return;
+            }
+
+            const subjectIndex = appData.subjects.findIndex(s => s.id === subjectId);
+            if (subjectIndex !== -1) {
+                appData.subjects[subjectIndex].name = newName;
+                appData.subjects[subjectIndex].description = newDescription;
+                saveData();
+                renderSettingsSubjectSelect(); // Refresh dropdowns
+                renderSubjects(); // Re-render main subject list
+                authFeedback.textContent = 'Mata pelajaran berhasil diperbarui!';
+                authFeedback.className = 'text-center text-green-600 font-bold mt-4';
+                subjectEditForm.classList.add('hidden');
+            }
+        });
+
+        // Delete Subject
+        deleteSubjectBtn.addEventListener('click', () => {
+            const subjectId = selectSubjectToEdit.value;
+            if (!subjectId) {
+                authFeedback.textContent = 'Pilih mata pelajaran untuk dihapus.';
+                authFeedback.className = 'text-center text-red-600 font-bold mt-4';
+                return;
+            }
+            if (confirm('Apakah Anda yakin ingin menghapus mata pelajaran ini beserta semua babnya?')) {
+                appData.subjects = appData.subjects.filter(s => s.id !== subjectId);
+                delete appData.chapters[subjectId]; // Delete associated chapters
+                saveData();
+                renderSettingsSubjectSelect();
+                renderSubjects(); // Re-render main subject list
+                authFeedback.textContent = 'Mata pelajaran berhasil dihapus!';
+                authFeedback.className = 'text-center text-green-600 font-bold mt-4';
+                subjectEditForm.classList.add('hidden');
+            }
+        });
+
+        // Add New Subject (Now uses custom modal)
+        addNewSubjectBtn.addEventListener('click', () => {
+            console.log('addNewSubjectBtn clicked. Showing custom input modal.');
+            showCustomInputModal('Tambah Mata Pelajaran Baru', 'Masukkan nama mata pelajaran baru...', (newSubjectName) => {
+                if (newSubjectName && newSubjectName.trim() !== '') {
+                    const newSubjectId = newSubjectName.toLowerCase().replace(/\s/g, '-').replace(/[^a-z0-9-]/g, ''); // Simple ID generation
+                    if (appData.subjects.some(s => s.id === newSubjectId)) {
+                        customInputFeedback.textContent = 'Mata pelajaran dengan nama ini sudah ada.';
+                        customInputFeedback.classList.remove('hidden');
+                        return false; // Keep modal open
+                    }
+                    appData.subjects.push({
+                        id: newSubjectId,
+                        name: newSubjectName.trim(),
+                        description: 'Deskripsi mata pelajaran baru.'
+                    });
+                    appData.chapters[newSubjectId] = []; // Initialize empty chapters array
+                    saveData();
+                    renderSettingsSubjectSelect();
+                    renderSubjects();
+                    authFeedback.textContent = 'Mata pelajaran baru berhasil ditambahkan!';
+                    authFeedback.className = 'text-center text-green-600 font-bold mt-4';
+                    console.log('New subject added successfully:', newSubjectId);
+                    return true; // Close modal
+                } else {
+                    customInputFeedback.textContent = 'Judul tidak boleh kosong.';
+                    customInputFeedback.classList.remove('hidden');
+                    console.log('New subject creation cancelled or empty title.');
+                    return false; // Keep modal open
+                }
+            });
+        });
+
+        // Edit Chapter
+        editChapterBtn.addEventListener('click', () => {
+            const subjectId = selectSubjectForChapters.value;
+            const chapterId = selectChapterToEdit.value;
+
+            if (!subjectId || !chapterId) {
+                authFeedback.textContent = 'Pilih mata pelajaran dan bab untuk diedit.';
+                authFeedback.className = 'text-center text-red-600 font-bold mt-4';
+                return;
+            }
+            authFeedback.textContent = '';
+            const chapter = appData.chapters[subjectId].find(c => c.id === chapterId);
+            if (chapter) {
+                editChapterTitle.value = chapter.title;
+                editChapterSummary.value = chapter.content_summary;
+                editMaterialContent.value = chapter.material_content;
+                editVideoUrl.value = chapter.video_url;
+                editAudioUrl.value = chapter.audio_url; // Set audio URL
+                chapterEditForm.dataset.subjectId = subjectId;
+                chapterEditForm.dataset.chapterId = chapterId;
+                chapterEditForm.classList.remove('hidden');
+                subjectEditForm.classList.add('hidden'); // Hide subject form if chapter is edited
+                renderQuizEdit(chapter.quiz);
+            }
+        });
+
+        // Render Quiz Questions for Editing
+        function renderQuizEdit(quizArray) {
+            quizQuestionsEditArea.innerHTML = '';
+            quizArray.forEach((q, qIndex) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.classList.add('p-3', 'border', 'rounded-md', 'bg-white', 'mb-3');
+                questionDiv.innerHTML = `
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="block text-gray-700 text-sm font-bold">Pertanyaan ${qIndex + 1}:</label>
+                        <button class="remove-question-btn text-red-500 hover:text-red-700 text-xl">&times;</button>
+                    </div>
+                    <input type="text" class="question-text-input shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-2" value="${q.question}" placeholder="Teks Pertanyaan">
+                    <div class="options-container space-y-2 mb-2">
+                        <!-- Options will be added here -->
+                    </div>
+                    <button class="add-option-btn bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-bold py-1 px-3 rounded-md w-full">Tambah Opsi</button>
+                    <label class="block text-gray-700 text-sm font-bold mt-2">Jawaban Benar (indeks 0-based):</label>
+                    <input type="number" class="correct-answer-input shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" value="${q.correct_answer_index}" min="0">
+                `;
+                quizQuestionsEditArea.appendChild(questionDiv);
+
+                const optionsContainer = questionDiv.querySelector('.options-container');
+                q.options.forEach((option, oIndex) => {
+                    const optionInput = document.createElement('input');
+                    optionInput.type = 'text';
+                    optionInput.classList.add('option-input', 'shadow', 'appearance-none', 'border', 'rounded', 'w-full', 'py-1', 'px-2', 'text-gray-700', 'leading-tight', 'focus:outline-none', 'focus:shadow-outline');
+                    optionInput.value = option;
+                    optionInput.placeholder = `Opsi ${oIndex + 1}`;
+                    optionsContainer.appendChild(optionInput);
+                });
+
+                // Event listeners for new elements
+                questionDiv.querySelector('.remove-question-btn').addEventListener('click', () => {
+                    quizArray.splice(qIndex, 1);
+                    renderQuizEdit(quizArray); // Re-render to update indices
+                });
+                questionDiv.querySelector('.add-option-btn').addEventListener('click', () => {
+                    q.options.push(''); // Add an empty option
+                    renderQuizEdit(quizArray); // Re-render to show new option
+                });
+            });
+        }
+
+        // Add New Quiz Question
+        addQuizQuestionBtn.addEventListener('click', () => {
+            const subjectId = chapterEditForm.dataset.subjectId;
+            const chapterId = chapterEditForm.dataset.chapterId;
+            const chapter = appData.chapters[subjectId].find(c => c.id === chapterId);
+            
+            if (chapter) {
+                chapter.quiz.push({ question: '', options: ['', '', ''], correct_answer_index: 0 }); // Default 3 options
+                renderQuizEdit(chapter.quiz);
+            }
+        });
+
+        // Save Chapter Changes
+        saveChapterChangesBtn.addEventListener('click', () => {
+            const subjectId = chapterEditForm.dataset.subjectId;
+            const chapterId = chapterEditForm.dataset.chapterId;
+
+            const chapter = appData.chapters[subjectId].find(c => c.id === chapterId);
+
+            if (chapter) {
+                chapter.title = editChapterTitle.value.trim();
+                chapter.content_summary = editChapterSummary.value.trim();
+                chapter.material_content = editMaterialContent.value;
+                chapter.video_url = editVideoUrl.value.trim();
+                chapter.audio_url = editAudioUrl.value.trim(); // Save audio URL
+
+                // Update quiz questions
+                const updatedQuiz = [];
+                Array.from(quizQuestionsEditArea.children).forEach(questionDiv => {
+                    const questionText = questionDiv.querySelector('.question-text-input').value.trim();
+                    const options = Array.from(questionDiv.querySelectorAll('.option-input')).map(input => input.value.trim());
+                    const correctAnswerIndex = parseInt(questionDiv.querySelector('.correct-answer-input').value, 10);
+
+                    if (questionText && options.some(opt => opt !== '')) { // Only add if question and at least one option exist
+                        updatedQuiz.push({
+                            question: questionText,
+                            options: options.filter(opt => opt !== ''), // Filter out empty options
+                            correct_answer_index: isNaN(correctAnswerIndex) ? 0 : correctAnswerIndex
+                        });
+                    }
+                });
+                chapter.quiz = updatedQuiz;
+
+                saveData();
+                renderChapters(subjectId); // Re-render chapter list to show changes
+                authFeedback.textContent = 'Bab berhasil diperbarui!';
+                authFeedback.className = 'text-center text-green-600 font-bold mt-4';
+                chapterEditForm.classList.add('hidden');
+            }
+        });
+
+        // Delete Chapter
+        deleteChapterBtn.addEventListener('click', () => {
+            const subjectId = selectSubjectForChapters.value;
+            const chapterId = selectChapterToEdit.value;
+
+            if (!subjectId || !chapterId) {
+                authFeedback.textContent = 'Pilih mata pelajaran dan bab untuk dihapus.';
+                authFeedback.className = 'text-center text-red-600 font-bold mt-4';
+                return;
+            }
+            if (confirm('Apakah Anda yakin ingin menghapus bab ini?')) {
+                appData.chapters[subjectId] = appData.chapters[subjectId].filter(c => c.id !== chapterId);
+                saveData();
+                selectChapterToEdit.innerHTML = '<option value="">Pilih Bab</option>'; // Clear selected chapter
+                chapterEditForm.classList.add('hidden'); // Hide form
+                renderChapters(subjectId); // Re-render chapter list
+                authFeedback.textContent = 'Bab berhasil dihapus!';
+                authFeedback.className = 'text-center text-green-600 font-bold mt-4';
+            }
+        });
+
+        // Add New Chapter (Now uses custom modal)
+        addNewChapterBtn.addEventListener('click', () => {
+            const subjectId = selectSubjectForChapters.value;
+            console.log('Attempting to add new chapter. Subject ID:', subjectId); // Debug log
+            if (!subjectId) {
+                authFeedback.textContent = 'Pilih mata pelajaran terlebih dahulu untuk menambahkan bab baru.';
+                authFeedback.className = 'text-center text-red-600 font-bold mt-4';
+                console.log('No subject selected.'); // Debug log
+                return;
+            }
+
+            showCustomInputModal('Tambah Bab Baru', 'Masukkan judul bab baru...', (newChapterTitle) => {
+                if (newChapterTitle && newChapterTitle.trim() !== '') {
+                    const newChapterId = `${subjectId}-${newChapterTitle.toLowerCase().replace(/\s/g, '-').replace(/[^a-z0-9-]/g, '')}-${Date.now()}`; // Unique ID
+                    
+                    if (!appData.chapters[subjectId]) {
+                        appData.chapters[subjectId] = [];
+                    }
+
+                    appData.chapters[subjectId].push({
+                        id: newChapterId,
+                        title: newChapterTitle.trim(),
+                        content_summary: 'Ringkasan materi bab baru.',
+                        material_content: '<p>Materi bab baru akan ditulis di sini.</p>',
+                        video_url: '',
+                        audio_url: '', // Initialize new audio field
+                        quiz: [
+                            { question: 'Pertanyaan 1 kuis bab baru?', options: ['Opsi A', 'Opsi B', 'Opsi C'], correct_answer_index: 0 },
+                            { question: 'Pertanyaan 2 kuis bab baru?', options: ['Opsi A', 'Opsi B', 'Opsi C'], correct_answer_index: 1 },
+                            { question: 'Pertanyaan 3 kuis bab baru?', options: ['Opsi A', 'Opsi B', 'Opsi C'], correct_answer_index: 2 },
+                            { question: 'Pertanyaan 4 kuis bab baru?', options: ['Opsi A', 'Opsi B', 'Opsi C'], correct_answer_index: 0 },
+                            { question: 'Pertanyaan 5 kuis bab baru?', options: ['Opsi A', 'Opsi B', 'Opsi C'], correct_answer_index: 1 }
+                        ]
+                    });
+                    saveData();
+                    renderSettingsSubjectSelect(); // Refresh dropdowns
+                    selectSubjectForChapters.value = subjectId; // Keep subject selected
+                    selectSubjectForChapters.dispatchEvent(new Event('change')); // Trigger change to load new chapter
+                    authFeedback.textContent = 'Bab baru berhasil ditambahkan!';
+                    authFeedback.className = 'text-center text-green-600 font-bold mt-4';
+                    renderChapters(subjectId); // Re-render main chapter list
+                    console.log('New chapter added successfully:', newChapterId);
+                    return true; // Close modal
+                } else {
+                    customInputFeedback.textContent = 'Judul tidak boleh kosong.';
+                    customInputFeedback.classList.remove('hidden');
+                    console.log('New chapter creation cancelled or empty title.');
+                    return false; // Keep modal open
+                }
+            });
+        });
+
+        // --- Custom Input Modal Logic (New!) ---
+        function showCustomInputModal(title, placeholder, callback) {
+            customInputTitle.textContent = title;
+            customInputField.value = '';
+            customInputField.placeholder = placeholder;
+            customInputFeedback.classList.add('hidden'); // Hide previous feedback
+            customInputCallback = callback; // Store the callback
+
+            customInputModal.classList.add('active');
+            customInputField.focus(); // Focus on the input field
+        }
+
+        function hideCustomInputModal() {
+            customInputModal.classList.remove('active');
+            customInputCallback = null; // Clear the callback
+        }
+
+        customInputCloseButton.addEventListener('click', hideCustomInputModal);
+        customInputCancelBtn.addEventListener('click', hideCustomInputModal);
+
+        customInputSubmitBtn.addEventListener('click', () => {
+            const inputValue = customInputField.value.trim();
+            if (customInputCallback) {
+                // If callback returns true, close modal. Otherwise, keep open for correction.
+                const shouldClose = customInputCallback(inputValue);
+                if (shouldClose) {
+                    hideCustomInputModal();
+                }
+            } else {
+                hideCustomInputModal(); // Close if no callback set
+            }
+        });
+
+        customInputField.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                customInputSubmitBtn.click();
+            }
+        });
+
+
+        // --- Initialize the application ---
+        document.addEventListener('DOMContentLoaded', () => {
+            renderSubjects();
+            // Initial message from Cikgu Tere when the chat opens
+            if (chatHistory.length === 0) { // Only add initial message if chat history is empty
+                chatHistory.push({ role: "model", parts: [{ text: "Halo! Saya Cikgu Tere. Ada yang bisa saya bantu hari ini?" }] });
+            }
+        });
+    </script>
+</body>
+</html>
