@@ -464,8 +464,8 @@
                         <textarea id="editChapterSummary" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline h-24 mb-4"></textarea>
                         <label for="editMaterialContent" class="block text-gray-700 text-sm font-bold mb-2">Konten Materi (Teks/HTML):</label>
                         <textarea id="editMaterialContent" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline h-48 mb-4"></textarea>
-                        <label for="editVideoUrl" class="block text-gray-700 text-sm font-bold mb-2">URL Video YouTube (embed):</label>
-                        <input type="text" id="editVideoUrl" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-4">
+                        <label for="editVideoUrl" class="block text-gray-700 text-sm font-bold mb-2">URL Video YouTube (Direct Link):</label>
+                        <input type="text" id="editVideoUrl" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-4" placeholder="Misal: https://www.youtube.com/watch?v=VIDEO_ID_ANDA">
                         <label for="editAudioUrl" class="block text-gray-700 text-sm font-bold mb-2">URL Audio:</label>
                         <input type="text" id="editAudioUrl" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-4">
                         
@@ -545,7 +545,7 @@
                             <p class="mb-4">Dengan menjaga lingkungan, kita menunjukkan rasa syukur kita kepada Allah atas segala ciptaan-Nya yang luar biasa. Kita juga memastikan bahwa bumi ini tetap indah dan layak dihuni untuk generasi mendatang.</p>
                             <p class="italic text-sm text-gray-500">Sumber: Diadaptasi dari materi Pendidikan Agama Katolik dan Budi Pekerti Kelas 5 SD.</p>
                         `,
-                        video_url: 'https://www.youtube.com/embed/S2pE8-r60F8', // Placeholder: Video tentang keindahan alam ciptaan Tuhan
+                        video_url: 'S2pE8-r60F8', // Placeholder: Video ID tentang keindahan alam ciptaan Tuhan
                         audio_url: '', // New: Placeholder for audio
                         quiz: [
                             { question: 'Siapakah yang menciptakan alam semesta dan isinya?', options: ['Manusia', 'Hewan', 'Allah', 'Tumbuhan'], correct_answer_index: 2 },
@@ -567,7 +567,7 @@
                             <p class="mb-4">Dengan percaya kepada Yesus dan mengikuti ajaran-Nya, kita menerima keselamatan dan hidup yang kekal. Setiap kali kita berdoa, kita berbicara dengan-Nya, dan melalui Sakramen Ekaristi, kita menerima Dia dalam hati kita.</p>
                             <p class="italic text-sm text-gray-500">Sumber: Diadaptasi dari materi Pendidikan Agama Katolik dan Budi Pekerti Kelas 5 SD.</p>
                         `,
-                        video_url: 'https://www.youtube.com/embed/MQt1x9eE2K0', // Placeholder: Video tentang kisah Yesus
+                        video_url: 'MQt1x9eE2K0', // Placeholder: Video ID tentang kisah Yesus
                         audio_url: '', // New: Placeholder for audio
                         quiz: [
                             { question: 'Siapakah Yesus Kristus bagi umat Katolik?', options: ['Seorang nabi', 'Seorang guru', 'Putra Allah dan Juru Selamat', 'Seorang raja'], correct_answer_index: 2 },
@@ -596,7 +596,7 @@
                             <p>Setiap sakramen memiliki peran penting dalam perjalanan iman kita dan membantu kita tumbuh menjadi pribadi yang lebih baik sesuai kehendak Tuhan.</p>
                             <p class="italic text-sm text-gray-500">Sumber: Diadaptasi dari materi Pendidikan Agama Katolik dan Budi Pekerti Kelas 5 SD.</p>
                         `,
-                        video_url: 'https://www.youtube.com/embed/example-sakramen-gereja', // Placeholder: Video tentang Sakramen Gereja Katolik
+                        video_url: 'example-sakramen-gereja', // Placeholder: Video ID tentang Sakramen Gereja Katolik
                         audio_url: '', // New: Placeholder for audio
                         quiz: [
                             { question: 'Berapa jumlah sakramen dalam Gereja Katolik?', options: ['5', '6', '7', '8'], correct_answer_index: 2 },
@@ -626,7 +626,7 @@
                             <p class="mb-4">Lambang negara kita adalah <strong>Garuda Pancasila</strong>. Burung Garuda gagah perkasa ini mencengkeram pita bertuliskan "Bhinneka Tunggal Ika", yang artinya "Berbeda-beda tetapi Tetap Satu Jua". Ini mengingatkan kita bahwa meskipun kita memiliki banyak suku, bahasa, dan agama, kita tetap satu bangsa Indonesia.</p>
                             <p class="italic text-sm text-gray-500">Sumber: Diadaptasi dari materi Pendidikan Pancasila Kelas 5 SD (Kurikulum Merdeka).</p>
                         `,
-                        video_url: 'https://www.youtube.com/embed/ZtqS7Xh7hXo', // Placeholder: Video tentang Pancasila dan Lambangnya
+                        video_url: 'ZtqS7Xh7hXo', // Placeholder: Video ID tentang Pancasila dan Lambangnya
                         audio_url: '', // New: Placeholder for audio
                         quiz: [
                             { question: 'Apa dasar negara Republik Indonesia?', options: ['UUD 1945', 'Pancasila', 'Bhinneka Tunggal Ika', 'NKRI'], correct_answer_index: 1 },
@@ -663,7 +663,7 @@
                             <p class="mb-4">Hak dan kewajiban harus berjalan seimbang, ya. Kita tidak bisa hanya menuntut hak tanpa melaksanakan kewajiban, begitu juga sebaliknya.</p>
                             <p class="italic text-sm text-gray-500">Sumber: Diadaptasi dari materi Pendidikan Pancasila Kelas 5 SD (Kurikulum Merdeka).</p>
                         `,
-                        video_url: 'https://www.youtube.com/embed/tG5p5E1b8pQ', // Placeholder: Video tentang Hak dan Kewajiban
+                        video_url: 'tG5p5E1b8pQ', // Placeholder: Video ID tentang Hak dan Kewajiban
                         audio_url: '', // New: Placeholder for audio
                         quiz: [
                             { question: 'Sesuatu yang seharusnya kita dapatkan disebut...', options: ['Kewajiban', 'Hak', 'Tugas', 'Tanggung jawab'], correct_answer_index: 1 },
@@ -692,7 +692,7 @@
                             <p class="mb-4">Ide pokok dari paragraf di atas adalah: "Kucing adalah hewan peliharaan yang banyak disukai."</p>
                             <p class="italic text-sm text-gray-500">Sumber: Diadaptasi dari materi Bahasa Indonesia Kelas 5 SD (Kurikulum Merdeka).</p>
                         `,
-                        video_url: 'https://www.youtube.com/embed/Zq4D1T1bE2g', // Placeholder: Video tentang Ide Pokok
+                        video_url: 'Zq4D1T1bE2g', // Placeholder: Video ID tentang Ide Pokok
                         audio_url: '', // New: Placeholder for audio
                         quiz: [
                             { question: 'Apa yang dimaksud dengan ide pokok?', options: ['Kalimat pertama', 'Gagasan utama paragraf', 'Penjelasan tambahan', 'Kesimpulan cerita'], correct_answer_index: 1 },
@@ -723,7 +723,7 @@
                             <p class="mb-4">Contoh Judul Teks Prosedur: "Cara Membuat Layang-layang", "Langkah-langkah Mencuci Tangan dengan Benar".</p>
                             <p class="italic text-sm text-gray-500">Sumber: Diadaptasi dari materi Bahasa Indonesia Kelas 5 SD (Kurikulum Merdeka).</p>
                         `,
-                        video_url: 'https://www.youtube.com/embed/fW_D_m-M2uY', // Placeholder: Video tentang Teks Prosedur
+                        video_url: 'fW_D_m-M2uY', // Placeholder: Video ID tentang Teks Prosedur
                         audio_url: '', // New: Placeholder for audio
                         quiz: [
                             { question: 'Apa tujuan utama teks prosedur?', options: ['Untuk menghibur', 'Untuk memberikan petunjuk cara melakukan sesuatu', 'Untuk menceritakan pengalaman', 'Untuk memberikan pendapat'], correct_answer_index: 1 },
@@ -757,7 +757,7 @@
                             <p class="mb-4">Maka: $\\frac{3}{4} \\times \\frac{2}{1} = \\frac{6}{4} = 1\\frac{2}{4} = 1\\frac{1}{2}$</p>
                             <p class="italic text-sm text-gray-500">Sumber: Diadaptasi dari materi Matematika Kelas 5 SD (Kurikulum Merdeka).</p>
                         `,
-                        video_url: 'https://www.youtube.com/embed/fW_D_m-M2uY', // Placeholder: Video tentang Operasi Hitung Pecahan
+                        video_url: 'fW_D_m-M2uY', // Placeholder: Video ID tentang Operasi Hitung Pecahan
                         audio_url: '', // New: Placeholder for audio
                         quiz: [
                             { question: 'Hasil dari $\\frac{1}{3} + \\frac{1}{6}$ adalah...', options: ['$\\frac{2}{9}$', '$\\frac{2}{6}$', '$\\frac{3}{6}$', '$\\frac{1}{2}$'], correct_answer_index: 3 },
@@ -784,7 +784,7 @@
                             <p class="mb-4">Contoh: Sebuah balok memiliki panjang 5 cm, lebar 3 cm, dan tinggi 2 cm. Maka volumenya = $5 \\text{ cm} \\times 3 \\text{ cm} \\times 2 \\text{ cm} = 30 \\text{ cm}^3$</p>
                             <p class="italic text-sm text-gray-500">Sumber: Diadaptasi dari materi Matematika Kelas 5 SD (Kurikulum Merdeka).</p>
                         `,
-                        video_url: 'https://www.youtube.com/embed/zN871a2lqM0', // Placeholder: Video tentang Volume Kubus dan Balok
+                        video_url: 'zN871a2lqM0', // Placeholder: Video ID tentang Volume Kubus dan Balok
                         audio_url: '', // New: Placeholder for audio
                         quiz: [
                             { question: 'Apa rumus untuk menghitung volume kubus?', options: ['Sisi x Sisi', 'Panjang x Lebar', 'Sisi x Sisi x Sisi', 'Alas x Tinggi'], correct_answer_index: 2 },
@@ -813,7 +813,7 @@
                             <p class="mb-4">Contoh rantai makanan sederhana: Padi (Produsen) &#8594; Tikus (Konsumen I) &#8594; Ular (Konsumen II) &#8594; Elang (Konsumen III) &#8594; Bakteri/Jamur (Pengurai).</p>
                             <p class="italic text-sm text-gray-500">Sumber: Diadaptasi dari materi IPAS Kelas 5 SD (Kurikulum Merdeka).</p>
                         `,
-                        video_url: 'https://www.youtube.com/embed/Km1h0xH6Hw8', // Placeholder: Video tentang Rantai Makanan
+                        video_url: 'Km1h0xH6Hw8', // Placeholder: Video ID tentang Rantai Makanan
                         audio_url: '', // New: Placeholder for audio
                         quiz: [
                             { question: 'Hubungan makan dan dimakan antar makhluk hidup secara berurutan disebut...', options: ['Siklus air', 'Rantai makanan', 'Jaring-jaring makanan', 'Daur hidup'], correct_answer_index: 1 },
@@ -848,7 +848,7 @@
                             </ul>
                             <p class="italic text-sm text-gray-500">Sumber: Diadaptasi dari materi IPAS Kelas 5 SD (Kurikulum Merdeka).</p>
                         `,
-                        video_url: 'https://www.youtube.com/embed/2_mD89XJp4U', // Placeholder: Video tentang Energi dan Perubahannya
+                        video_url: '2_mD89XJp4U', // Placeholder: Video ID tentang Energi dan Perubahannya
                         audio_url: '', // New: Placeholder for audio
                         quiz: [
                             { question: 'Apa yang dimaksud dengan energi?', options: ['Kemampuan untuk tidur', 'Kemampuan untuk melakukan kerja', 'Kemampuan untuk makan', 'Kemampuan untuk bermain'], correct_answer_index: 1 },
@@ -1195,11 +1195,13 @@
             materialChapterTitle.textContent = `${selectedSubject ? selectedSubject.name : ''} - ${selectedChapter.title}`;
             materialContent.innerHTML = selectedChapter.material_content;
             
-            // Embed YouTube video
+            // Embed YouTube video using the extracted video ID
             if (selectedChapter.video_url) {
+                // Ensure the video_url stored is already the video ID
+                const videoId = selectedChapter.video_url; 
                 materialVideo.innerHTML = `
                     <iframe 
-                        src="${selectedChapter.video_url}" 
+                        src="https://www.youtube.com/embed/${videoId}" 
                         title="YouTube video player" 
                         frameborder="0" 
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
@@ -1403,14 +1405,39 @@
             }
         }
 
+        // Fungsi untuk mengekstrak ID video YouTube dari berbagai format URL
+        function getYouTubeVideoId(url) {
+            let videoId = '';
+            const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
+            const match = url.match(youtubeRegex);
+            if (match && match[1]) {
+                videoId = match[1];
+            }
+            return videoId;
+        }
+
         // Fungsi untuk mengirim pesan ke AI
         async function sendToAI(prompt) {
+            // *** START KONFIGURASI KUNCI API PENTING: Ganti PLACEHOLDER ini dengan kunci API Gemini Anda yang asli. ***
+            // Anda bisa mendapatkan kunci API dari Google AI Studio (https://aistudio.google.com/app/apikey)
+            // atau Google Cloud Console.
+            // Jangan pernah menyimpan kunci API sensitif langsung di kode yang akan di-hosting secara publik
+            // dalam aplikasi yang lebih kompleks; gunakan variabel lingkungan atau proxy server yang aman.
+            const apiKey = "AIzaSyA3pKr2mErPwA2FcG2EEmK3zYbrgabBFfs"; // <--- GANTI INI dengan kunci API Anda yang valid!
+
+            if (apiKey.trim() === "") { // Updated check: only trim and check for empty string
+                hideTypingIndicator();
+                addMessage('ai', 'Maaf, kunci API Gemini belum diatur. Silakan edit file `index.html` dan ganti `""` di `const apiKey = "";` dengan kunci API Anda yang valid.');
+                console.error('ERROR: Kunci API Gemini belum diatur atau masih kosong.');
+                return; // Hentikan eksekusi jika kunci API tidak valid
+            }
+            // *** AKHIR KONFIGURASI KUNCI API ***
+
             showTypingIndicator();
             addMessage('user', prompt);
 
             chatHistory.push({ role: "user", parts: [{ text: prompt }] });
             const payload = { contents: chatHistory };
-            const apiKey = "AIzaSyA3pKr2mErPwA2FcG2EEmK3zYbrgabBFfs";
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
             try {
@@ -1419,6 +1446,16 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
+                
+                // Cek jika respons HTTP tidak OK (misalnya 400 Bad Request, 401 Unauthorized)
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error('API Error Response:', errorData);
+                    hideTypingIndicator();
+                    addMessage('ai', `Maaf, terjadi masalah saat menghubungi Cikgu Tere. Mungkin kunci API salah atau ada masalah jaringan. Status: ${response.status}. Detail: ${errorData.error ? errorData.error.message : 'Tidak ada detail error.'}`);
+                    return;
+                }
+
                 const result = await response.json();
                 hideTypingIndicator();
 
@@ -1429,12 +1466,12 @@
                     addMessage('ai', aiResponse);
                     chatHistory.push({ role: "model", parts: [{ text: aiResponse }] });
                 } else {
-                    addMessage('ai', 'Maaf, saya tidak dapat memahami permintaan Anda. Bisakah Anda mengulanginya?');
+                    addMessage('ai', 'Maaf, Cikgu Tere tidak dapat menghasilkan respons yang valid. Silakan coba pertanyaan lain.');
                 }
             } catch (error) {
                 console.error('Error calling Gemini API:', error);
                 hideTypingIndicator();
-                addMessage('ai', 'Maaf, terjadi kesalahan saat menghubungi Cikgu Tere. Silakan coba lagi nanti.');
+                addMessage('ai', 'Maaf, terjadi kesalahan jaringan atau teknis. Silakan coba lagi nanti.');
             }
         }
 
@@ -1618,7 +1655,8 @@
                 editChapterTitle.value = chapter.title;
                 editChapterSummary.value = chapter.content_summary;
                 editMaterialContent.value = chapter.material_content;
-                editVideoUrl.value = chapter.video_url;
+                // When loading, set the input value to the *embed* URL or empty if no video
+                editVideoUrl.value = chapter.video_url ? `https://www.youtube.com/watch?v=${chapter.video_url}` : '';
                 editAudioUrl.value = chapter.audio_url; // Set audio URL
                 chapterEditForm.dataset.subjectId = subjectId;
                 chapterEditForm.dataset.chapterId = chapterId;
@@ -1694,7 +1732,11 @@
                 chapter.title = editChapterTitle.value.trim();
                 chapter.content_summary = editChapterSummary.value.trim();
                 chapter.material_content = editMaterialContent.value;
-                chapter.video_url = editVideoUrl.value.trim();
+                
+                // Process the YouTube direct URL input
+                const youtubeUrlInput = editVideoUrl.value.trim();
+                chapter.video_url = getYouTubeVideoId(youtubeUrlInput); // Store only the video ID
+
                 chapter.audio_url = editAudioUrl.value.trim(); // Save audio URL
 
                 // Update quiz questions
@@ -1767,7 +1809,7 @@
                         title: newChapterTitle.trim(),
                         content_summary: 'Ringkasan materi bab baru.',
                         material_content: '<p>Materi bab baru akan ditulis di sini.</p>',
-                        video_url: '',
+                        video_url: '', // Stored as video ID now
                         audio_url: '', // Initialize new audio field
                         quiz: [
                             { question: 'Pertanyaan 1 kuis bab baru?', options: ['Opsi A', 'Opsi B', 'Opsi C'], correct_answer_index: 0 },
