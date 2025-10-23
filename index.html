@@ -856,19 +856,32 @@
             });
         }
 
-        function saveData() {
+        // <<< START FIX: Make saveData async and return status, update UI feedback >>>
+        async function saveData() {
             if (!db) {
                 console.error("Firestore is not initialized. Cannot save data.");
-                return;
+                return false;
             }
             // Use the public document reference for saving
             const contentDocRef = doc(db, `artifacts/${appId}/public/data/content`, 'master_content');
             
-            // Write the entire appData structure to Firestore
-            setDoc(contentDocRef, appData, { merge: true })
-                .then(() => console.log('Data successfully saved to Firestore.'))
-                .catch((error) => console.error('Error writing document to Firestore:', error));
+            try {
+                // Write the entire appData structure to Firestore
+                await setDoc(contentDocRef, appData, { merge: true });
+                console.log('Data successfully saved to Firestore.');
+                return true;
+            } catch (error) {
+                console.error('Error writing document to Firestore:', error);
+                // Display error on the banner for critical issues
+                if (error.code === 'permission-denied') {
+                    displayFirestoreError('Gagal menyimpan. Izin menulis Firestore Ditolak. Periksa Aturan Keamanan.');
+                } else {
+                    displayFirestoreError('Gagal menyimpan. Kesalahan koneksi/server. Cek konsol.');
+                }
+                return false;
+            }
         }
+        // <<< END FIX >>>
 
 
         // --- Authentication Functions for Settings ---
@@ -936,10 +949,10 @@
         closeSettingsButton.addEventListener('click', () => {
             settingsModal.classList.remove('active');
             appData.currentUser.isSettingsAdmin = false; // Revoke settings admin access on close
-            saveData(); // Save updated state (Firestore handles data persistence now)
+            // No need to call saveData() here, as changes should have been saved immediately after edit
         });
 
-        saveNewSettingsPasswordBtn.addEventListener('click', () => {
+        saveNewSettingsPasswordBtn.addEventListener('click', async () => { // <<< FIX: Made async
             const oldPass = oldSettingsPasswordInput.value;
             const newPass = newSettingsPasswordInput.value;
             const confirmNewPass = confirmNewSettingsPasswordInput.value;
@@ -971,14 +984,20 @@
             }
 
             appData.settingsPassword = newPass;
-            saveData(); // Save the new password to Firestore
-            passwordChangeFeedback.textContent = 'Password pengaturan berhasil diubah!';
-            passwordChangeFeedback.classList.add('text-green-600');
             
-            // Clear fields after successful change
-            oldSettingsPasswordInput.value = '';
-            newSettingsPasswordInput.value = '';
-            confirmNewSettingsPasswordInput.value = '';
+            const saveSuccess = await saveData(); // <<< FIX: Await save status
+
+            if (saveSuccess) {
+                passwordChangeFeedback.textContent = 'Password pengaturan berhasil diubah dan disimpan online!';
+                passwordChangeFeedback.classList.add('text-green-600');
+                // Clear fields after successful change
+                oldSettingsPasswordInput.value = '';
+                newSettingsPasswordInput.value = '';
+                confirmNewSettingsPasswordInput.value = '';
+            } else {
+                passwordChangeFeedback.textContent = 'Gagal menyimpan password baru secara online. Periksa konsol dan Aturan Keamanan Firestore.';
+                passwordChangeFeedback.classList.add('text-red-600');
+            }
         });
 
 
@@ -1379,9 +1398,9 @@
             // Di lingkungan Canvas, kunci akan disediakan secara otomatis.
             const apiKey = "AIzaSyBdiX0pSBrxiR3xeraFi0mrBBHsovXDow0"; // Ganti dengan kunci API Anda yang valid saat hosting di luar Canvas!
 
-            if (apiKey.trim() === "") { 
+            if (apiKey.trim() === "AIzaSyBdiX0pSBrxiR3xeraFi0mrBBHsovXDow0" || apiKey.trim() === "") { 
                 hideTypingIndicator();
-                addMessage('ai', 'Maaf, kunci API Gemini belum diatur. Silakan edit file `index.html` dan ganti `""` dengan kunci API Anda yang valid.');
+                addMessage('ai', 'Maaf, kunci API Gemini belum diatur atau salah. Mohon masukkan kunci API Anda yang valid.');
                 console.error('ERROR: Kunci API Gemini belum diatur atau masih kosong.');
                 return; // Hentikan eksekusi jika kunci API tidak valid
             }
@@ -1458,7 +1477,7 @@
         closeSettingsButton.addEventListener('click', () => {
             settingsModal.classList.remove('active');
             appData.currentUser.isSettingsAdmin = false; // Revoke settings admin access on close
-            saveData(); // Save updated state (Firestore handles data persistence now)
+            // No need to call saveData() here, as changes should have been saved immediately after edit
         });
 
         // Populate Subject dropdowns in settings
@@ -1517,7 +1536,7 @@
         });
 
         // Save Subject Changes
-        saveSubjectChangesBtn.addEventListener('click', () => {
+        saveSubjectChangesBtn.addEventListener('click', async () => { // <<< FIX: Made async
             const subjectId = subjectEditForm.dataset.subjectId;
             const newName = editSubjectName.value.trim();
             const newDescription = editSubjectDescription.value.trim();
@@ -1532,17 +1551,24 @@
             if (subjectIndex !== -1) {
                 appData.subjects[subjectIndex].name = newName;
                 appData.subjects[subjectIndex].description = newDescription;
-                saveData(); // Save changes to Firestore
-                renderSettingsSubjectSelect(); // Refresh dropdowns
-                renderSubjects(); // Re-render main subject list
-                authFeedback.textContent = 'Mata pelajaran berhasil diperbarui!';
-                authFeedback.className = 'text-center text-green-600 font-bold mt-4';
-                subjectEditForm.classList.add('hidden');
+                
+                const saveSuccess = await saveData(); // <<< FIX: Await save status
+
+                if (saveSuccess) {
+                    renderSettingsSubjectSelect(); // Refresh dropdowns
+                    renderSubjects(); // Re-render main subject list
+                    authFeedback.textContent = 'Mata pelajaran berhasil diperbarui dan tersimpan online!';
+                    authFeedback.className = 'text-center text-green-600 font-bold mt-4';
+                    subjectEditForm.classList.add('hidden');
+                } else {
+                    authFeedback.textContent = 'Gagal menyimpan perubahan mata pelajaran secara online. Periksa Aturan Keamanan Firestore.';
+                    authFeedback.className = 'text-center text-red-600 font-bold mt-4';
+                }
             }
         });
 
         // Delete Subject
-        deleteSubjectBtn.addEventListener('click', () => {
+        deleteSubjectBtn.addEventListener('click', async () => { // <<< FIX: Made async
             const subjectId = selectSubjectToEdit.value;
             if (!subjectId) {
                 authFeedback.textContent = 'Pilih mata pelajaran untuk dihapus.';
@@ -1552,19 +1578,26 @@
             if (confirm('Apakah Anda yakin ingin menghapus mata pelajaran ini beserta semua babnya?')) {
                 appData.subjects = appData.subjects.filter(s => s.id !== subjectId);
                 delete appData.chapters[subjectId]; // Delete associated chapters
-                saveData(); // Save changes to Firestore
-                renderSettingsSubjectSelect();
-                renderSubjects(); // Re-render main subject list
-                authFeedback.textContent = 'Mata pelajaran berhasil dihapus!';
-                authFeedback.className = 'text-center text-green-600 font-bold mt-4';
-                subjectEditForm.classList.add('hidden');
+                
+                const saveSuccess = await saveData(); // <<< FIX: Await save status
+
+                if (saveSuccess) {
+                    renderSettingsSubjectSelect();
+                    renderSubjects(); // Re-render main subject list
+                    authFeedback.textContent = 'Mata pelajaran berhasil dihapus dan tersimpan online!';
+                    authFeedback.className = 'text-center text-green-600 font-bold mt-4';
+                    subjectEditForm.classList.add('hidden');
+                } else {
+                    authFeedback.textContent = 'Gagal menghapus mata pelajaran secara online. Periksa Aturan Keamanan Firestore.';
+                    authFeedback.className = 'text-center text-red-600 font-bold mt-4';
+                }
             }
         });
 
         // Add New Subject (Now uses custom modal)
         addNewSubjectBtn.addEventListener('click', () => {
             console.log('addNewSubjectBtn clicked. Showing custom input modal.');
-            showCustomInputModal('Tambah Mata Pelajaran Baru', 'Masukkan nama mata pelajaran baru...', (newSubjectName) => {
+            showCustomInputModal('Tambah Mata Pelajaran Baru', 'Masukkan nama mata pelajaran baru...', async (newSubjectName) => { // <<< FIX: Made async
                 if (newSubjectName && newSubjectName.trim() !== '') {
                     const newSubjectId = newSubjectName.toLowerCase().replace(/\s/g, '-').replace(/[^a-z0-9-]/g, ''); // Simple ID generation
                     if (appData.subjects.some(s => s.id === newSubjectId)) {
@@ -1578,13 +1611,24 @@
                         description: 'Deskripsi mata pelajaran baru.'
                     });
                     appData.chapters[newSubjectId] = []; // Initialize empty chapters array
-                    saveData(); // Save changes to Firestore
-                    renderSettingsSubjectSelect();
-                    renderSubjects();
-                    authFeedback.textContent = 'Mata pelajaran baru berhasil ditambahkan!';
-                    authFeedback.className = 'text-center text-green-600 font-bold mt-4';
-                    console.log('New subject added successfully:', newSubjectId);
-                    return true; // Close modal
+                    
+                    const saveSuccess = await saveData(); // <<< FIX: Await save status
+
+                    if (saveSuccess) {
+                        renderSettingsSubjectSelect();
+                        renderSubjects();
+                        authFeedback.textContent = 'Mata pelajaran baru berhasil ditambahkan dan tersimpan online!';
+                        authFeedback.className = 'text-center text-green-600 font-bold mt-4';
+                        console.log('New subject added successfully:', newSubjectId);
+                        return true; // Close modal
+                    } else {
+                        authFeedback.textContent = 'Gagal menambah mata pelajaran baru secara online. Periksa Aturan Keamanan Firestore.';
+                        authFeedback.className = 'text-center text-red-600 font-bold mt-4';
+                        // Revert the local change if save fails to avoid desync
+                        appData.subjects.pop(); 
+                        delete appData.chapters[newSubjectId];
+                        return false; // Keep modal open or prompt user to retry
+                    }
                 } else {
                     customInputFeedback.textContent = 'Judul tidak boleh kosong.';
                     customInputFeedback.classList.remove('hidden');
@@ -1677,7 +1721,7 @@
         });
 
         // Save Chapter Changes
-        saveChapterChangesBtn.addEventListener('click', () => {
+        saveChapterChangesBtn.addEventListener('click', async () => { // <<< FIX: Made async
             const subjectId = chapterEditForm.dataset.subjectId;
             const chapterId = chapterEditForm.dataset.chapterId;
 
@@ -1711,16 +1755,22 @@
                 });
                 chapter.quiz = updatedQuiz;
 
-                saveData(); // Save changes to Firestore
-                renderChapters(subjectId); // Re-render chapter list to show changes
-                authFeedback.textContent = 'Bab berhasil diperbarui!';
-                authFeedback.className = 'text-center text-green-600 font-bold mt-4';
-                chapterEditForm.classList.add('hidden');
+                const saveSuccess = await saveData(); // <<< FIX: Await save status
+
+                if (saveSuccess) {
+                    renderChapters(subjectId); // Re-render chapter list to show changes
+                    authFeedback.textContent = 'Bab berhasil diperbarui dan tersimpan online!';
+                    authFeedback.className = 'text-center text-green-600 font-bold mt-4';
+                    chapterEditForm.classList.add('hidden');
+                } else {
+                    authFeedback.textContent = 'Gagal menyimpan perubahan bab secara online. Periksa Aturan Keamanan Firestore.';
+                    authFeedback.className = 'text-center text-red-600 font-bold mt-4';
+                }
             }
         });
 
         // Delete Chapter
-        deleteChapterBtn.addEventListener('click', () => {
+        deleteChapterBtn.addEventListener('click', async () => { // <<< FIX: Made async
             const subjectId = selectSubjectForChapters.value;
             const chapterId = selectChapterToEdit.value;
 
@@ -1731,12 +1781,19 @@
             }
             if (confirm('Apakah Anda yakin ingin menghapus bab ini?')) {
                 appData.chapters[subjectId] = appData.chapters[subjectId].filter(c => c.id !== chapterId);
-                saveData(); // Save changes to Firestore
-                selectChapterToEdit.innerHTML = '<option value="">Pilih Bab</option>'; // Clear selected chapter
-                chapterEditForm.classList.add('hidden'); // Hide form
-                renderChapters(subjectId); // Re-render chapter list
-                authFeedback.textContent = 'Bab berhasil dihapus!';
-                authFeedback.className = 'text-center text-green-600 font-bold mt-4';
+                
+                const saveSuccess = await saveData(); // <<< FIX: Await save status
+
+                if (saveSuccess) {
+                    selectChapterToEdit.innerHTML = '<option value="">Pilih Bab</option>'; // Clear selected chapter
+                    chapterEditForm.classList.add('hidden'); // Hide form
+                    renderChapters(subjectId); // Re-render chapter list
+                    authFeedback.textContent = 'Bab berhasil dihapus dan tersimpan online!';
+                    authFeedback.className = 'text-center text-green-600 font-bold mt-4';
+                } else {
+                    authFeedback.textContent = 'Gagal menghapus bab secara online. Periksa Aturan Keamanan Firestore.';
+                    authFeedback.className = 'text-center text-red-600 font-bold mt-4';
+                }
             }
         });
 
@@ -1751,7 +1808,7 @@
                 return;
             }
 
-            showCustomInputModal('Tambah Bab Baru', 'Masukkan judul bab baru...', (newChapterTitle) => {
+            showCustomInputModal('Tambah Bab Baru', 'Masukkan judul bab baru...', async (newChapterTitle) => { // <<< FIX: Made async
                 if (newChapterTitle && newChapterTitle.trim() !== '') {
                     const newChapterId = `${subjectId}-${newChapterTitle.toLowerCase().replace(/\s/g, '-').replace(/[^a-z0-9-]/g, '')}-${Date.now()}`; // Unique ID
                     
@@ -1774,15 +1831,26 @@
                             { question: 'Pertanyaan 5 kuis bab baru?', options: ['Opsi A', 'Opsi B', 'Opsi C'], correct_answer_index: 1 }
                         ]
                     });
-                    saveData(); // Save changes to Firestore
-                    renderSettingsSubjectSelect(); // Refresh dropdowns
-                    selectSubjectForChapters.value = subjectId; // Keep subject selected
-                    selectSubjectForChapters.dispatchEvent(new Event('change')); // Trigger change to load new chapter
-                    authFeedback.textContent = 'Bab baru berhasil ditambahkan!';
-                    authFeedback.className = 'text-center text-green-600 font-bold mt-4';
-                    renderChapters(subjectId); // Re-render main chapter list
-                    console.log('New chapter added successfully:', newChapterId);
-                    return true; // Close modal
+                    
+                    const saveSuccess = await saveData(); // <<< FIX: Await save status
+
+                    if (saveSuccess) {
+                        renderSettingsSubjectSelect(); // Refresh dropdowns
+                        selectSubjectForChapters.value = subjectId; // Keep subject selected
+                        selectSubjectForChapters.dispatchEvent(new Event('change')); // Trigger change to load new chapter
+                        authFeedback.textContent = 'Bab baru berhasil ditambahkan dan tersimpan online!';
+                        authFeedback.className = 'text-center text-green-600 font-bold mt-4';
+                        renderChapters(subjectId); // Re-render main chapter list
+                        console.log('New chapter added successfully:', newChapterId);
+                        return true; // Close modal
+                    } else {
+                        authFeedback.textContent = 'Gagal menambah bab baru secara online. Periksa Aturan Keamanan Firestore.';
+                        authFeedback.className = 'text-center text-red-600 font-bold mt-4';
+                        // Revert the local change if save fails to avoid desync
+                        appData.chapters[subjectId].pop();
+                        return false; // Keep modal open or prompt user to retry
+                    }
+
                 } else {
                     customInputFeedback.textContent = 'Judul tidak boleh kosong.';
                     customInputFeedback.classList.remove('hidden');
