@@ -1235,14 +1235,20 @@
 
 
         // --- Event Listeners Navigasi ---
+        // FIX: Added renderSubjects() call to ensure subject cards are redrawn with new data
         backToSubjectsBtn.addEventListener('click', () => {
             appData.currentView = 'subjects';
+            renderSubjects(); 
             updateVisibleSection();
         });
+
+        // FIX: Added renderChapters() call for consistency and immediate content update
         backToChaptersFromMaterialBtn.addEventListener('click', () => {
             appData.currentView = 'chapters';
+            renderChapters(appData.currentSubjectId); 
             updateVisibleSection();
         });
+        
         backToMaterialBtn.addEventListener('click', () => {
             appData.currentView = 'material';
             updateVisibleSection();
