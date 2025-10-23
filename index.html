@@ -856,7 +856,7 @@
             });
         }
 
-        // <<< START FIX: Make saveData async and return status, update UI feedback >>>
+        // <<< START FIX: Added logging for document path >>>
         async function saveData() {
             if (!db) {
                 console.error("Firestore is not initialized. Cannot save data.");
@@ -864,6 +864,9 @@
             }
             // Use the public document reference for saving
             const contentDocRef = doc(db, `artifacts/${appId}/public/data/content`, 'master_content');
+            
+            // LOGGING THE DOCUMENT PATH: MUST MATCH SECURITY RULES
+            console.log(`[Firestore Save] Attempting to write to path: ${contentDocRef.path}`);
             
             try {
                 // Write the entire appData structure to Firestore
@@ -874,7 +877,7 @@
                 console.error('Error writing document to Firestore:', error);
                 // Display error on the banner for critical issues
                 if (error.code === 'permission-denied') {
-                    displayFirestoreError('Gagal menyimpan. Izin menulis Firestore Ditolak. Periksa Aturan Keamanan.');
+                    displayFirestoreError('Gagal menyimpan. Izin menulis Firestore Ditolak. Harap periksa kembali Aturan Keamanan Firestore (match /artifacts/{appId}/public/data/{collection}/{document} harus mengizinkan "write").');
                 } else {
                     displayFirestoreError('Gagal menyimpan. Kesalahan koneksi/server. Cek konsol.');
                 }
@@ -1810,7 +1813,8 @@
 
             showCustomInputModal('Tambah Bab Baru', 'Masukkan judul bab baru...', async (newChapterTitle) => { // <<< FIX: Made async
                 if (newChapterTitle && newChapterTitle.trim() !== '') {
-                    const newChapterId = `${subjectId}-${newChapterTitle.toLowerCase().replace(/\s/g, '-').replace(/[^a-z0-9-]/g, '')}-${Date.now()}`; // Unique ID
+                    // Unique ID generation: subject-title-timestamp
+                    const newChapterId = `${subjectId}-${newChapterTitle.toLowerCase().replace(/\s/g, '-').replace(/[^a-z0-9-]/g, '')}-${Date.now()}`; 
                     
                     if (!appData.chapters[subjectId]) {
                         appData.chapters[subjectId] = [];
