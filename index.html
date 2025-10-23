@@ -276,6 +276,12 @@
         <a id="bantuanButton" href="#" class="text-white text-lg font-semibold mx-4 my-2 hover:text-gray-100 transition duration-300 cursor-pointer">Bantuan</a>
     </nav>
 
+    <!-- Firestore Error Banner (New) -->
+    <div id="firestoreErrorBanner" class="hidden fixed top-0 left-0 right-0 p-3 bg-red-600 text-white font-bold text-center z-50">
+        <p id="firestoreErrorMessage"></p>
+        <button onclick="document.getElementById('firestoreErrorBanner').classList.add('hidden')" class="ml-4 px-2 text-sm bg-red-800 rounded">Tutup</button>
+    </div>
+
     <!-- Main Content Area -->
     <main class="flex-grow p-6">
         <!-- Subject List Section (Initially Visible) -->
@@ -744,8 +750,26 @@
         // --- Content Sections ---
         const tentangSection = document.getElementById('tentang');
         const bantuanSection = document.getElementById('bantuan');
+        
+        // New DOM elements for error display
+        const firestoreErrorBanner = document.getElementById('firestoreErrorBanner');
+        const firestoreErrorMessage = document.getElementById('firestoreErrorMessage');
+
 
         // --- Firebase Core Functions ---
+
+        function displayFirestoreError(message) {
+            firestoreErrorMessage.textContent = 'ERROR (Perizinan Firestore): ' + message;
+            firestoreErrorBanner.classList.remove('hidden');
+            // Hide main content when critical error occurs, but allow settings to be accessed for debugging
+            subjectListSection.classList.add('hidden');
+            chapterListContainer.classList.add('hidden');
+            materialContainer.classList.add('hidden');
+            quizContainer.classList.add('hidden');
+            tentangSection.classList.add('hidden');
+            bantuanSection.classList.add('hidden');
+        }
+
 
         async function initializeFirebase() {
             if (!firebaseConfig) {
@@ -794,6 +818,7 @@
                     console.log("Real-time content update received from Firestore.");
                     // Overwrite local appData with Firestore data
                     const firestoreData = docSnap.data();
+                    firestoreErrorBanner.classList.add('hidden'); // Hide error banner if data received
 
                     // Merge and ensure required fields are present (safety check)
                     appData = {
@@ -811,12 +836,20 @@
                 }
                 // Re-render the UI based on new data
                 renderSubjects(); 
+                updateVisibleSection(); // Panggil setelah renderSubjects dan pembaruan data
                 // Update settings dropdowns if the modal is currently open
                 if (settingsModal.classList.contains('active')) {
                     renderSettingsSubjectSelect(); 
                 }
             }, (error) => {
-                console.error("Error listening to content changes (using default data):", error);
+                // Handle permission errors visibly
+                if (error.code === 'permission-denied') {
+                    displayFirestoreError('Akses Ditolak. Harap pastikan Aturan Keamanan Firestore mengizinkan READ/WRITE untuk jalur konten publik ini (artifacts/{appId}/public/data/content/{dokumen=**}).');
+                    console.error("ERROR: Firestore Permission Denied. Check Security Rules:", error);
+                } else {
+                    displayFirestoreError('Terjadi kesalahan koneksi Firestore. Cek konsol untuk detail.');
+                    console.error("Error listening to content changes (using default data):", error);
+                }
                 // Fallback: use default data if listener fails critically
                 appData = defaultAppData;
                 renderSubjects();
@@ -961,15 +994,35 @@
             bantuanSection.classList.add('hidden'); // Hide help section
         }
 
+        // New function: Manages which section is visible based on appData.currentView
+        function updateVisibleSection() {
+            hideAllSections();
+            switch (appData.currentView) {
+                case 'subjects':
+                    subjectListSection.classList.remove('hidden');
+                    break;
+                case 'chapters':
+                    chapterListContainer.classList.remove('hidden');
+                    break;
+                case 'material':
+                    materialContainer.classList.remove('hidden');
+                    break;
+                case 'quiz':
+                    quizContainer.classList.remove('hidden');
+                    break;
+                case 'tentang':
+                    tentangSection.classList.remove('hidden');
+                    break;
+                case 'bantuan':
+                    bantuanSection.classList.remove('hidden');
+                    break;
+            }
+        }
+
+
         // Menampilkan daftar mata pelajaran
         function renderSubjects() {
-            // Check if we need to switch view, but always re-render the content based on current data
-            if (appData.currentView === 'subjects') {
-                hideAllSections();
-                subjectListSection.classList.remove('hidden');
-            }
-
-
+            // Re-render the content based on current data
             subjectListSection.innerHTML = ''; // Clear previous content
             appData.subjects.forEach(subject => {
                 const subjectDiv = document.createElement('div');
@@ -978,15 +1031,18 @@
                     <h3 class="text-2xl font-bold text-gray-800 mb-2">${subject.name}</h3>
                     <p class="text-gray-600">${subject.description}</p>
                 `;
-                subjectDiv.addEventListener('click', () => renderChapters(subject.id));
+                subjectDiv.addEventListener('click', () => {
+                    appData.currentView = 'chapters'; // Update view state
+                    renderChapters(subject.id);
+                    updateVisibleSection(); // Show the new chapters view
+                });
                 subjectListSection.appendChild(subjectDiv);
             });
+            // visibility is now handled by updateVisibleSection()
         }
 
         // Menampilkan daftar bab untuk mata pelajaran tertentu
         function renderChapters(subjectId) {
-            hideAllSections();
-            chapterListContainer.classList.remove('hidden');
             appData.currentView = 'chapters';
             appData.currentSubjectId = subjectId; // Save current subject for navigation
 
@@ -1013,7 +1069,9 @@
                 `;
                 chapterDiv.querySelector('.read-material-btn').addEventListener('click', (event) => {
                     event.stopPropagation(); // Prevent chapterDiv click from firing
+                    appData.currentView = 'material';
                     showChapterDetails(chapter.id);
+                    updateVisibleSection(); // Show the material view
                 });
                 chapterList.appendChild(chapterDiv);
             });
@@ -1021,8 +1079,6 @@
 
         // Menampilkan detail materi dan video untuk bab tertentu
         function showChapterDetails(chapterId) {
-            hideAllSections();
-            materialContainer.classList.remove('hidden');
             appData.currentView = 'material';
             appData.currentChapterId = chapterId; // Save current chapter for navigation
 
@@ -1070,13 +1126,15 @@
             }
 
             // Set up "Mulai Kuis" button
-            startQuizFromMaterialBtn.onclick = () => startQuiz(chapterId);
+            startQuizFromMaterialBtn.onclick = () => {
+                appData.currentView = 'quiz';
+                startQuiz(chapterId);
+                updateVisibleSection(); // Show quiz view
+            };
         }
 
         // Memulai kuis untuk bab tertentu
         function startQuiz(chapterId) {
-            hideAllSections();
-            quizContainer.classList.remove('hidden');
             appData.currentView = 'quiz';
 
             const selectedSubject = appData.subjects.find(s => s.id === appData.currentSubjectId);
@@ -1177,32 +1235,39 @@
 
 
         // --- Event Listeners Navigasi ---
-        backToSubjectsBtn.addEventListener('click', renderSubjects);
-        backToChaptersFromMaterialBtn.addEventListener('click', () => renderChapters(appData.currentSubjectId));
-        backToMaterialBtn.addEventListener('click', () => showChapterDetails(appData.currentChapterId));
+        backToSubjectsBtn.addEventListener('click', () => {
+            appData.currentView = 'subjects';
+            updateVisibleSection();
+        });
+        backToChaptersFromMaterialBtn.addEventListener('click', () => {
+            appData.currentView = 'chapters';
+            updateVisibleSection();
+        });
+        backToMaterialBtn.addEventListener('click', () => {
+            appData.currentView = 'material';
+            updateVisibleSection();
+        });
 
         // Event listeners for top navigation buttons
         mapelButton.addEventListener('click', (event) => {
             event.preventDefault();
-            hideAllSections(); // Ensure all other sections are hidden
-            renderSubjects(); // This function already makes subjectList visible
-            // Scroll to top of main content area
+            appData.currentView = 'subjects';
+            renderSubjects(); // Re-render cards
+            updateVisibleSection();
             document.querySelector('main').scrollIntoView({ behavior: 'smooth' });
         });
 
         tentangButton.addEventListener('click', (event) => {
             event.preventDefault();
-            hideAllSections();
-            tentangSection.classList.remove('hidden');
             appData.currentView = 'tentang';
+            updateVisibleSection();
             tentangSection.scrollIntoView({ behavior: 'smooth' });
         });
 
         bantuanButton.addEventListener('click', (event) => {
             event.preventDefault(); // Prevent default anchor link behavior initially
-            hideAllSections();
-            bantuanSection.classList.remove('hidden');
             appData.currentView = 'bantuan';
+            updateVisibleSection();
             // Smooth scroll to the help section if it's not at the top of the viewport
             bantuanSection.scrollIntoView({ behavior: 'smooth' });
         });
