@@ -117,8 +117,9 @@
         window.FIREBASE_API_KEY = isConfigValid ? firebaseConfig.apiKey : "";
 
         // PENTING: KUNCI KHUSUS CHATBOT (GEMINI API)
-        // Kunci ini harus memiliki izin untuk Generative Language API.
-        window.GEMINI_API_KEY_CHAT = "AIzaSyDF_ZjkrlI2Q_sg7mCMODi969sADzEqdh0";
+        // Jika API Key Firebase Anda tidak diizinkan untuk Gemini API, gunakan kunci khusus di sini.
+        // Ganti "GANTI_DENGAN_KUNCI_GEMINI_ANDA" dengan Kunci Gemini API yang baru Anda buat.
+        window.GEMINI_API_KEY_CHAT = "GANTI_DENGAN_KUNCI_GEMINI_ANDA";
 
 
         // Handle Authentication
@@ -261,7 +262,7 @@
             selectedMaterialId: null,
         };
 
-        const ADMIN_PASSWORD = "admin123"; // PASSWORD ADMIN DISIMPAN HANYA DI SINI
+        const ADMIN_PASSWORD = "admin123";
         const ADMIN_ROOT_PATH = `artifacts/${window.appId}/users/admin_placeholder/admin_settings`;
         const SUBJECTS_COLLECTION_PATH = (appId) => `artifacts/${appId}/public/data/subjects`;
 
@@ -598,7 +599,7 @@
                     <div class="border-l-4 border-yellow-500 pl-4">
                         <h3 class="text-xl font-semibold text-gray-800 mb-2">Untuk Guru (Admin):</h3>
                         <ul class="list-disc list-inside space-y-1 text-gray-600">
-                            <li>Buka tab **Pengaturan Admin** dan masukkan kata sandi rahasia Anda.</li>
+                            <li>Buka tab **Pengaturan Admin** dan masukkan kata sandi (default: <code class="font-mono bg-gray-100 p-1 rounded">admin123</code>).</li>
                             <li>Setelah masuk, Anda dapat menambah Mata Pelajaran, Bab, dan Materi baru.</li>
                             <li>Pastikan URL yang dimasukkan untuk Video/Kuis dapat diakses publik.</li>
                         </ul>
@@ -621,7 +622,7 @@
                         Masuk
                     </button>
                     <p id="admin-login-message" class="mt-4 text-center text-red-500 hidden"></p>
-                    <!-- Keterangan Password Dihapus dari tampilan publik -->
+                    <p class="mt-6 text-sm text-gray-500 text-center">Kata sandi default: <code class="font-mono bg-gray-100 p-1 rounded">admin123</code></p>
                 </div>
             `;
         };
@@ -636,13 +637,7 @@
                 window.appState.isAdmin = true;
                 window.renderApp();
             } else {
-                // Tampilkan pesan kesalahan yang lebih aman, sambil tetap memberi petunjuk jika salah.
-                messageEl.innerHTML = `
-                    Kata sandi salah. Silakan coba lagi.
-                    <p class="mt-2 text-sm text-gray-500">
-                        (Tips: Jika lupa, kata sandi default adalah <code class="font-mono bg-gray-100 p-1 rounded">admin123</code>).
-                    </p>
-                `;
+                messageEl.textContent = "Kata sandi salah. Silakan coba lagi.";
                 messageEl.classList.remove('hidden');
             }
         };
@@ -747,36 +742,6 @@
                         `).join('')}
                     </div>
                 </div>
-                
-                <!-- NEW SECTION: FIRESTORE SECURITY RULES INSTRUCTION -->
-                <div class="mt-8 bg-yellow-50 p-6 rounded-xl shadow-lg border-l-4 border-yellow-500">
-                    <h3 class="text-2xl font-extrabold text-red-700 mb-4">4. FIX ERROR: PERMISSION DENIED (Wajib di Firebase Console)</h3>
-                    <p class="text-gray-700 mb-4">Jika Anda mendapat pesan **"Kode Error: permission-denied"** saat menyimpan data, Anda harus menyalin dan memublikasikan Aturan Keamanan Firestore berikut di Konsol Firebase Anda:</p>
-                    
-                    <ol class="list-decimal list-inside space-y-2 text-gray-600 mb-4 pl-4">
-                        <li>Buka **Firebase Console** > **Firestore Database** > Tab **Rules**.</li>
-                        <li>Ganti semua konten di editor aturan dengan kode di bawah ini.</li>
-                        <li>Klik **Publish** (Publikasikan).</li>
-                    </ol>
-
-                    <pre class="bg-gray-800 text-white p-4 rounded-lg overflow-x-auto text-sm font-mono whitespace-pre-wrap select-all"><code>rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    // ATURAN KRITIS: Izinkan Baca dan Tulis untuk pengguna terotentikasi (anonim termasuk).
-    match /artifacts/{appId}/public/data/subjects/{subjectId} {
-      allow read, write: if request.auth != null;
-    }
-
-    // Aturan untuk data pribadi (jika ada)
-    match /artifacts/{appId}/users/{userId}/{document=**} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-  }
-}</code></pre>
-
-                    <p class="mt-4 text-red-600 font-semibold">Pastikan juga status **Anonymous Sign-in** diaktifkan di bagian Authentication Firebase.</p>
-                </div>
-                <!-- END NEW SECTION -->
             `;
             
             // Re-render Material Form logic after HTML insertion
